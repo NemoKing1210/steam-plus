@@ -143,6 +143,8 @@ function buildList() {
 export const cacheTab = {
   id: 'cache',
   titleKey: 'tab.cache',
+  icon: 'database',
+  descKey: 'tab.cache.desc',
   renderInto(pane) {
     const usageSection = createSection({ icon: 'database', title: t('cache.usage') });
     const meterSlot = el('div', 'sp-cache-meter-slot');

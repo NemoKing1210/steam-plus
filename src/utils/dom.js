@@ -30,7 +30,7 @@ export function debounce(fn, delay) {
  * by content scans).
  */
 export function isOwnUi(node) {
-  return node instanceof Element && !!node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-translation, .sp-translate-btn');
+  return node instanceof Element && !!node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-translation, .sp-translate-btn, .sp-prices');
 }
 
 /**

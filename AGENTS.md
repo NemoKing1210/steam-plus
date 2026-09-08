@@ -54,19 +54,32 @@ steam-plus/
 │   │   └── ui/
 │   │       └── controller.js  # TranslatableNode: button + below/replace render
 │   ├── features/
+│   │   ├── gamepage/
+│   │   │   ├── blocks.js   # Hideable store game-page blocks + CSS builder
+│   │   │   └── index.js    # CSS-driven hiding, URL watcher, bus listener
+│   │   ├── prices/
+│   │   │   ├── regions.js  # Compared store regions (no FX — see fx.js)
+│   │   │   ├── fx.js       # Live exchange rates (2 providers + 24h GM cache)
+│   │   │   ├── api.js      # Same-origin appdetails price fetching (bounded)
+│   │   │   ├── cache.js    # GM-backed price cache (1h TTL)
+│   │   │   ├── ui.js       # Comparison block renderer (states + rows)
+│   │   │   └── index.js    # Mount/teardown, anchors, bus listener
 │   │   └── settings/
 │   │       ├── index.js    # Settings entry: account-menu item + header
-│   │       │               #   fallback button, GM menu command, tabs
-│   │       ├── panel.js    # Tabbed panel shell (registerTab / togglePanel)
+│   │       │               #   fallback button, GM menu command, pages
+│   │       ├── panel.js    # Panel shell: home nav + pages (registerPage / togglePanel)
 │   │       ├── controls.js # Row / switch / select / segmented / checkbox / button
 │   │       └── tabs/
-│   │           ├── general.js       # Interface language, reset
-│   │           └── translation.js   # Enabled, provider, trigger, display, scopes
+│   │           ├── general.js       # Interface language, toasts, reset
+│   │           ├── translation.js   # Enabled, provider, trigger, display, scopes
+│   │           ├── gamepage.js      # Master switch + per-block hide grid
+│   │           └── prices.js        # Regions, position, sort, display toggles
 │   ├── styles/
 │   │   ├── tokens.css      # :root design tokens (sp- palette — DESIGN.md)
 │   │   └── app.css         # Injected styles, sp- prefix (GM_addStyle via build)
 │   └── utils/
-│       └── dom.js          # el, append, debounce, isOwnUi, resolveTargetLanguage
+│       ├── dom.js          # el, append, debounce, isOwnUi, resolveTargetLanguage
+│       └── navigation.js   # watchStoreNavigation (shared SPA URL watcher)
 ├── scripts/
 │   ├── lib/artifacts.mjs   # ARTIFACT_FILES list (single source of truth)
 │   ├── copy-dist.mjs       # dist/ → root artifact copy
@@ -139,6 +152,11 @@ Minimal pub/sub: `on(event, fn)` (returns an unsubscribe fn), `off`,
 
 - `settings:translation` — emitted by the panel footer Save. The engine
   listens and reconciles live controllers (`applyTranslationSettings`).
+- `settings:gamepage` — emitted by the panel footer Save alongside
+  `settings:translation`. The gamepage feature listens and rebuilds its
+  hiding stylesheet (`applyGamepageSettings`).
+- `settings:prices` — emitted by the panel footer Save as well. The prices
+  feature listens and remounts its comparison block (`applyPricesSettings`).
 
 ### `src/core/debug.js` — diagnostics
 
@@ -152,7 +170,7 @@ Rules: log once per user-visible failure at the outermost point
 (`SP-1201` in the controller, carrying the origin `cause` code +
 provider/scope/lang context); layers below only throw coded errors.
 Storage hiccups are warnings (`SP-1210`/`SP-1211`), never silent.
-- `settings:language` — emitted by the General tab on language change/reset;
+- `settings:language` — emitted by the General page on language change/reset;
   reserved for future feature listeners (the panel re-renders itself directly
   after emitting).
 
@@ -190,10 +208,10 @@ Memory-first cache over `GM_getValue`/`GM_setValue`:
 - `persistCacheNow()` flushes pending writes **synchronously** (cancels the
   timer); it is bound to `pagehide` in `main.js` so nothing is lost when the
   tab closes.
-- `clearTranslationCache()` wipes memory + storage (wired to the Cache tab
+- `clearTranslationCache()` wipes memory + storage (wired to the Cache page
   action); `removeTranslationCacheEntry(key)` deletes one entry.
 - `getTranslationCacheStats()` (counts, bytes, per-provider split) and
-  `listTranslationCacheEntries()` (newest first) feed the Cache tab meter
+  `listTranslationCacheEntries()` (newest first) feed the Cache page meter
   and list.
 
 ### `src/translation/providers/`
@@ -243,7 +261,7 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
 
 ### `src/features/settings/` — panel
 
-- `index.js`: registers the four tabs; `ensureSettingsButton()` waits for
+- `index.js`: registers the six pages; `ensureSettingsButton()` waits for
   `#global_actions` and prefers a native entry in the account dropdown
   (`#account_dropdown .popup_body.popup_menu`, `popup_menu_item
   sp-menu-item`); without a dropdown it appends the compact `.sp-header-btn`
@@ -253,16 +271,19 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   `initSettingsFeature()` also registers the `GM_registerMenuCommand`
   (guarded with `typeof`). Opening the panel hides the Steam account
   dropdown first and stops event propagation.
-- `panel.js`: tab registry (`registerTab`), single modal overlay
+- `panel.js`: page registry (`registerPage`), single modal overlay
   `.sp-panel-overlay` built lazily (hidden attribute), panel header with
   product name + `v` version chip (from `GM_info.script.version`) +
-  subtitle + × close, sticky footer with Reset / Cancel / Save.
-  Tabs render into a mutable draft on open; nothing is persisted until
-  Save (`saveSettings` + `configureLocale` + both bus events), Cancel /
-  overlay click / `Escape` discards the draft. Changing the target
-  language clears the translation cache on Save. Scroll lock pins `<body>`
-  with scrollbar compensation (`sp-modal-open`) and swallows wheel/touch
-  outside the panel body.
+  subtitle + × close, sticky footer with Reset / Cancel / Save. The body
+  shows a home screen (vertical list of page buttons with icon, title,
+  description and the cache badge) or one settings page with a `‹ Back`
+  crumb (`switchPanelPage` / `showHome`). Pages render into a mutable
+  draft on open; nothing is persisted until Save (`saveSettings` +
+  `configureLocale` + both bus events), Cancel / overlay click discards
+  the draft, `Escape` returns home first (or closes on home). Changing
+  the target language clears the translation cache on Save. Scroll lock
+  pins `<body>` with scrollbar compensation (`sp-modal-open`) and
+  swallows wheel/touch outside the panel body.
 - `confirm.js`: promise-based `confirmDialog({ title, message,
   confirmLabel, cancelLabel, tone })` modal above the panel; used by the
   footer Reset (draft is refilled with defaults only after confirmation).
@@ -284,10 +305,44 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   pill, provider select from `listProviders()`), behavior
   (trigger/display segmented, target-language select), scopes (checkbox
   grid from `listTargets()`). Controls mutate the draft only.
-- `tabs/cache-pane.js`: translation-cache tab — storage meter, collapsible
+- `tabs/cache-pane.js`: translation-cache page — storage meter, collapsible
   stored-translations list with per-entry removal, clear-cache action with
-  status line; `paintCachePane()` repaints meter/list/tab badge.
+  status line; `paintCachePane()` repaints meter/list/home badge.
 - `tabs/about.js`: product hero with version chip, author card, repo link.
+
+### `src/features/gamepage/` — hideable store game-page blocks
+
+- `blocks.js`: `GAMEPAGE_BLOCKS` registry (10 blocks collected from a live
+  `/app/<id>` page: media, purchase, description, DLC, system requirements,
+  reviews, curators, events, details, recommendations), each with the
+  container selectors that hide the block header included;
+  `isGamePageUrl()` gates `/app/<id>` + `/agecheck/app/<id>`;
+  `buildGamepageCss(hidden)` emits the `display: none !important` rules.
+- `index.js`: `applyGamepageSettings()` keeps a single `#sp-gamepage-style`
+  element in sync with settings (removed when disabled, off-page, or
+  nothing hidden). Pure CSS keeps working across Steam re-renders —
+  navigation is observed through the shared `watchStoreNavigation()`
+  helper — plus a `settings:gamepage` bus listener for live Save updates.
+
+### `src/features/prices/` — regional price comparison
+
+- `regions.js`: `PRICE_REGIONS` (24 store regions: `cc` API code, English
+  proper-noun name, hint currency).
+- `fx.js`: live USD-based rates from ExchangeRate-API with a jsDelivr
+  currency-API fallback (`loadFxRates` with a settings-driven TTL,
+  `peekFxCache`/`clearFxCache` for the settings status and button); `convertMinor`/`toUsd` convert minor
+  units, `formatMoney` renders the target currency via `Intl`. Rates feed
+  ranking, cheapest highlight, savings and the converted-price display —
+  raw prices always stay in Steam's own formatted strings.
+- `api.js`: same-origin `appdetails` fetching (`fetchPriceOverview`,
+  `loadAppPrices` with `MAX_PRICE_REQUESTS` parallelism, per-region
+  failure isolation, refresh bypasses the cache).
+- `cache.js`: memory-first GM cache (`sp_prices_cache_v1`, 1h TTL).
+- `ui.js` / `index.js`: `.sp-prices` table mounted before the buy options,
+  in the sidebar, or below the description (with fallbacks); headers sort
+  in-block with direction toggle (settings row order is the default, home
+  row stays pinned); remounts on `settings:prices` and store navigation;
+  hides itself for free games.
 
 ### `src/i18n/`
 
@@ -330,7 +385,7 @@ but must not own feature state. Rules that keep it acyclic:
   the caller's job.
 - `features/settings` and `translation` never import each other; they talk
   through the bus and registries.
-- Side-effect registrations (`targets/all.js`, `google-free.js`, tab
+- Side-effect registrations (`targets/all.js`, `google-free.js`, page
   registration in `features/settings/index.js`) run at import time — a module
   that must be registered is imported by the module that owns its lifecycle.
 
@@ -376,6 +431,17 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `translation.targetLanguage` | `'auto'` | `'auto'` = Steam/browser language, else an ISO code from the select |
 | `translation.showCached` | `true` | Render cached translations instantly, no button press |
 | `translation.scopes.*` | all `true` | Per-target switches keyed by target id |
+| `gamepage.enabled` | `true` | Master switch for hiding blocks on store game pages |
+| `gamepage.hidden.*` | all `false` | Per-block hide flags keyed by block id (`media`, `purchase`, `description`, `dlc`, `sysreq`, `reviews`, `curators`, `events`, `details`, `recommendations`); nothing is hidden by default |
+| `prices.enabled` | `true` | Master switch for the regional price comparison block |
+| `prices.autoLoad` | `true` | Load prices automatically; off shows a per-page load button |
+| `prices.regions` | 7 defaults | Compared store country codes (`cc`), in display order; unknown codes are ignored |
+| `prices.position` | `'purchase'` | Block placement: `'purchase'` (above buy options), `'sidebar'`, `'description'` |
+| `prices.sort` | `'custom'` | Row order: `'custom'` (as listed), `'priceAsc'`, `'discountDesc'` |
+| `prices.showOriginal` / `showDiscount` / `showSavings` / `highlightCheapest` / `showHomeRow` | all `true` | Display toggles: original price, discount badge, savings vs own price, cheapest highlight, own-price row |
+| `prices.convertTo` | `'auto'` | Display currency: `'auto'` (own store currency), `'off'`, or an ISO code — every price converts via live rates |
+| `prices.showConverted` | `true` | Show the converted price (`≈ …`) next to Steam's formatted price |
+| `prices.fxTtl` | `86400000` (24h) | Exchange rates cache lifetime: 1h / 6h / 24h / 7d; the Conversion section also shows the cached-rates status and a clear-cache button |
 | `toasts.enabled` | `true` | Master switch for toast notifications |
 | `toasts.position` | `'bottom-right'` | Toast corner: `bottom/top` × `right/left` |
 | `toasts.duration` | `5000` | Auto-hide ms (`0` = sticky until dismissed) |
@@ -445,7 +511,9 @@ Keep the version synchronized in `package.json` and `package-lock.json`
 `CHANGELOG.md` versions with it: record every user-visible change under
 `[Unreleased]`; when bumping, move those bullets into a new
 `## [X.Y.Z] - YYYY-MM-DD` section (with a matching link reference at the
-bottom) and leave `[Unreleased]` empty. The userscript metadata is generated
+bottom) and leave `[Unreleased]` empty. Keep the version badge and the
+Status line in `README.md` synchronized with the bumped version.
+The userscript metadata is generated
 from `package.json`; run `npm run build` after every bump so the root
 `.user.js` / `.meta.js` headers carry the new version.
 

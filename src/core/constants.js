@@ -4,6 +4,7 @@ export const AUTHOR_URL = 'https://github.com/NemoKing1210';
 export const REPO_URL = 'https://github.com/NemoKing1210/steam-plus';
 export const SETTINGS_KEY = 'sp_settings_v1';
 export const TRANSLATION_CACHE_KEY = 'sp_translation_cache_v1';
+export const PRICES_CACHE_KEY = 'sp_prices_cache_v1';
 
 /** Translation cache TTL, ms (7 days). */
 export const TRANSLATION_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -15,6 +16,12 @@ export const TRANSLATION_CACHE_MAX_ENTRIES = 2000;
 export const MAX_CONCURRENT_REQUESTS = 3;
 /** Max characters per provider request (text is hard-split beyond this). */
 export const MAX_REQUEST_TEXT_LENGTH = 4000;
+/** Regional price cache TTL, ms (1 hour). */
+export const PRICE_CACHE_TTL_MS = 60 * 60 * 1000;
+/** Exchange rates cache TTL, ms (24 hours). */
+export const FX_RATES_TTL_MS = 24 * 60 * 60 * 1000;
+/** Max parallel regional price requests. */
+export const MAX_PRICE_REQUESTS = 3;
 /** Debounce for DOM mutation rescans. */
 export const SCAN_DEBOUNCE_MS = 450;
 /** CSS class prefix used by every element we create (excluded from scans). */
@@ -43,10 +50,63 @@ const DEFAULT_TRANSLATION = {
   },
 };
 
+/** Game page block visibility: master switch + per-block hide flags. */
+const DEFAULT_GAMEPAGE = {
+  /** Master switch for hiding blocks on store game pages. */
+  enabled: true,
+  /** Block ids (see features/gamepage/blocks.js) mapped to hidden flags. */
+  hidden: {
+    media: false,
+    purchase: false,
+    description: false,
+    dlc: false,
+    sysreq: false,
+    reviews: false,
+    curators: false,
+    events: false,
+    details: false,
+    recommendations: false,
+  },
+};
+
+/** Regional price comparison on store game pages. */
+const DEFAULT_PRICES = {
+  /** Master switch for the regional prices block. */
+  enabled: true,
+  /** Load prices automatically; otherwise show a per-page load button. */
+  autoLoad: true,
+  /** Store country codes (`cc` API param) to compare, in display order. */
+  regions: ['US', 'DE', 'GB', 'PL', 'UA', 'KZ', 'TR'],
+  /** Block placement: 'purchase' (below buy options), 'sidebar', 'description'. */
+  position: 'purchase',
+  /** Row order: 'custom' (as listed), 'priceAsc', 'discountDesc'. */
+  sort: 'custom',
+  /** Show the original (pre-discount) price next to the final one. */
+  showOriginal: true,
+  /** Show the Steam-green discount badge. */
+  showDiscount: true,
+  /** Show the converted-price difference against the visitor's own price. */
+  showSavings: true,
+  /** Highlight the cheapest comparable region. */
+  highlightCheapest: true,
+  /** Pin the visitor's own store price as the first row. */
+  showHomeRow: true,
+  /** Convert prices into this currency: 'auto' (own store currency), 'off', or an ISO code. */
+  convertTo: 'auto',
+  /** Show the converted price next to Steam's own formatted price. */
+  showConverted: true,
+  /** Exchange rates cache lifetime, ms (1h / 6h / 24h / 7d). */
+  fxTtl: FX_RATES_TTL_MS,
+};
+
 export const DEFAULT_SETTINGS = {
   /** UI language: 'auto' or one of SUPPORTED_LOCALES. */
   language: 'auto',
   translation: DEFAULT_TRANSLATION,
+  /** Hidden blocks on store game pages (`/app/<id>`). */
+  gamepage: DEFAULT_GAMEPAGE,
+  /** Regional price comparison on store game pages. */
+  prices: DEFAULT_PRICES,
   /** Toast notifications: master switch, screen corner, auto-hide ms (0 = sticky). */
   toasts: {
     enabled: true,

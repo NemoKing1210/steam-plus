@@ -14,6 +14,8 @@ const TOAST_POSITIONS = ['bottom-right', 'bottom-left', 'top-right', 'top-left']
 export const generalTab = {
   id: 'general',
   titleKey: 'tab.general',
+  icon: 'sliders',
+  descKey: 'tab.general.desc',
   renderInto(pane, draft) {
     const languageSection = createSection({ icon: 'globe', title: t('general.language') });
     const languageOptions = [

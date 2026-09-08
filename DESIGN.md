@@ -43,8 +43,8 @@ Steam palette; do not hardcode raw hexes in component CSS.
 | `--sp-field` | `#316282` | select/input fill (Steam form control) |
 | `--sp-field-active` | `#3d7a9c` | select/input fill on focus |
 | `--sp-text` | `#c7d5e0` | body text |
-| `--sp-text-strong` | `#ffffff` | headings, active tab, hovered text |
-| `--sp-text-muted` | `#8f98a0` | secondary text, hints, inactive tabs |
+| `--sp-text-strong` | `#ffffff` | headings, nav titles, hovered text |
+| `--sp-text-muted` | `#8f98a0` | secondary text, hints, nav descriptions |
 | `--sp-success` | `#a4d007` | positive states (cracked badge, active dot) |
 | `--sp-danger` | `#c45c5c` | destructive buttons/errors |
 | `--sp-border` | `#000000` | hard borders (Steam outline style) |
@@ -71,7 +71,8 @@ font: 12px/1.4 "Motiva Sans", Arial, Helvetica, sans-serif;
 | Element | Spec |
 |---|---|
 | Panel title | 14px / 700 / `--sp-text-strong` |
-| Tab labels, section captions | 11px / 700 / uppercase, `letter-spacing: .04em` |
+| Nav titles | 13px / 700 |
+| Section captions, back crumb | 11px / 700 / uppercase, `letter-spacing: .04em` |
 | Switch labels | 13px / `--sp-text` |
 | Field labels | 10px / 700 / uppercase, `letter-spacing: .04em` / `--sp-text-muted` |
 | Descriptions, hints, subtitles | 11–12px / `--sp-text-muted` |
@@ -99,15 +100,22 @@ font: 12px/1.4 "Motiva Sans", Arial, Helvetica, sans-serif;
   55%), linear-gradient(90deg, #1a2332, var(--sp-bg-1))`. Sticky inside the
   panel. Contains title + version chip + muted subtitle on the left, ×
   close button on the right.
-- **Tab strip**: bottom black border, subtle `rgba(0,0,0,.18)` background,
-  tabs flexed equally; the active tab gets white text plus a sliding
-  2px `--sp-accent` indicator (`.sp-panel__tabs-indicator`, glides via
-  `transform`/`width` transitions, repositioned on open/switch/resize).
-  A tab may carry a pill badge
-  (`.sp-panel__tab-badge`, `--low/--mid/--high` tones). The incoming pane
-  slides in from the travel direction (14px, `≈ .22s`) while its direct
-  children fade in with a short stagger (up to `≈ .16s` delay) unless
-  reduced motion is requested.
+- **Home navigation** (`.sp-panel__home`, `.sp-panel__nav`): the panel
+  opens on a home screen — a vertical list of full-width page buttons
+  (`.sp-panel__nav-item`), each with an accent icon, a bold 13px title,
+  a muted one-line description and a right `›` chevron. Items use the
+  section card treatment (black border, dark wash, inner highlight) and
+  lift with an accent border + white title on hover. The Cache item
+  carries a pill badge (`.sp-panel__tab-badge`, `--low/--mid/--high`
+  tones). Clicking an item opens that settings page.
+- **Page crumb** (`.sp-panel__crumb`): every settings page opens with a
+  top row — an accent `‹ Back` button (`.sp-panel__back`) on the left and
+  the muted uppercase page title on the right, separated from the content
+  by a `--sp-line` hairline. The incoming view slides in from the travel
+  direction (14px, `≈ .22s`) while its children (nav items or sections)
+  fade in with a short stagger (up to `≈ .16s` delay) unless reduced
+  motion is requested. `Escape` on a page returns home; `Escape` on home
+  closes the panel.
 - **Panel footer**: sticky bottom bar with a top black border over a
   translucent black wash. Actions right-aligned: destructive Reset pinned
   left via `margin-right: auto`, then Cancel (ghost) and Save (accent).
@@ -193,7 +201,7 @@ when any setting differs from defaults. While the panel is open the button
 takes `.is-open` (green gradient); the account-dropdown entry takes
 `.is-open` in accent text instead. Hide the text label under 900px.
 
-### Cache tab (`.sp-cache-*`)
+### Cache page (`.sp-cache-*`)
 Storage meter: large fill-percentage number (accent/amber/red by
 `--low/--mid/--high` tone), used-bytes line, segmented bar with one tone
 per provider plus a free remainder, and a legend with per-provider counts
@@ -229,10 +237,34 @@ on confirm, cancel, overlay click and `Escape`; focuses the safe choice
 settles the first one with `false`, so only one dialog is ever open.
 `.sp-confirm-overlay` is excluded from content scans like the panel.
 
-### About tab (`.sp-about`)
+### About page (`.sp-about`)
 Hero row (product name + version chip), one-line blurb, author card
 (bordered wash, name + handle, accent name on hover), ghost repo button,
 hint with source pointers.
+
+### Game page page
+No new components: a master switch section (`gamepage.title`) plus a
+`gamepage.blocks` section reusing the switch grid from the translation
+scopes. Hiding itself is CSS (`#sp-gamepage-style`,
+`display: none !important` per enabled block) — no injected buttons or
+boxes on the store page, so nothing here needs a scan exclusion.
+
+### Regional prices (`.sp-prices`)
+Sunken info panel (`rgba(0,0,0,.25)` wash, black border, inner highlight)
+that reads as a Steam store section: uppercase accent header with a muted
+`Updated {time}` stamp and a ghost ⟳ refresh button; rows live in a real
+`<table>` (region · price · discount · savings) with clickable headers —
+click sorts, click again flips the direction (`aria-sort` follows); the
+visitor's own price row stays pinned above the sorted rows, numbers are
+right-aligned tabular, and a scroll wrapper keeps the narrow sidebar
+placement intact. Prices render in
+Steam's own formatted strings with the converted value (`≈ …`, muted,
+hidden when it matches the row currency) beside them; the discount badge reuses the store green
+(`#4c6b22` / `#BEEE11`); the cheapest row gets a `--sp-success` left
+border plus the ON `.sp-pill`; the visitor's own price row gets a faint
+accent wash. Loading uses the ring spinner; errors and the manual-load
+button reuse `.sp-button` tones. The rates source line (`prices.fxHint`)
+stays hidden unless rates actually feed something visible.
 
 ### Translation UI (`.sp-translate-btn`, `.sp-translation`)
 Inline per-block control: icon + label in translucent accent fill
@@ -262,8 +294,8 @@ keeps the sunken `--sp-bg-deep` well styling.
 ## 6. Motion
 
 - Defaults: `transition: color .15s ease, border-color .15s ease` etc.
-- Pane switch: directional slide (14px horizontal, `.22s ease-out`) +
-  staggered fade of pane children; tab indicator glide (`.22s ease`).
+- View switch: directional slide (14px horizontal, `.22s ease-out`) +
+  staggered fade of nav items / page sections.
 - Respect `prefers-reduced-motion: reduce` — drop animations/transitions for
   our UI (Steam content keeps its own behavior).
 - A settings page should never look “busy”: one coordinated entrance at

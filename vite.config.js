@@ -59,11 +59,12 @@ export default defineConfig({
         updateURL: `${RAW_BASE}/steam-plus.user.js`,
         downloadURL: `${RAW_BASE}/steam-plus.user.js`,
         license: 'MIT',
+        icon: 'https://store.steampowered.com/favicon.ico',
         match: [
           'https://store.steampowered.com/*',
           'https://steamcommunity.com/*',
         ],
-        connect: ['translate.googleapis.com'],
+        connect: ['translate.googleapis.com', 'open.er-api.com', 'cdn.jsdelivr.net'],
         'run-at': 'document-idle',
         noframes: true,
       },

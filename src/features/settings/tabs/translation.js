@@ -33,6 +33,8 @@ const COMMON_TARGET_LANGUAGES = {
 export const translationTab = {
   id: 'translation',
   titleKey: 'tab.translation',
+  icon: 'globe',
+  descKey: 'tab.translation.desc',
   renderInto(pane, draft) {
     const tr = draft.translation;
 

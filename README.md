@@ -3,7 +3,7 @@
 [![CI](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-102436?style=for-the-badge&labelColor=66c0f4)](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/steam-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.10.0-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
 
 A userscript that improves the Steam Store and Steam Community with a full
 settings panel and content translation — game descriptions, reviews, profile
@@ -15,9 +15,9 @@ Compatible with [Tampermonkey](https://www.tampermonkey.net/),
 [ScriptCat](https://scriptcat.org/), and other managers that support the
 `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.1.0`). Settings panel (General · Translation) +
-> content translation through the free Google endpoint (no API key). More
-> Steam improvements planned.
+> **Status:** early (`0.10.0`). Settings panel (General · Translation ·
+> Game page · Prices) + content translation through the free Google endpoint
+> (no API key). More Steam improvements planned.
 
 > The script's `@updateURL` / `@downloadURL` point at GitHub `main` — the raw
 > install URL below is always the newest build.
@@ -67,7 +67,7 @@ Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](docs/DEVEL
 
 **Settings** (header **Steam Plus** button or userscript-manager menu):
 
-- Tabbed panel — **General** · **Translation** (more tabs planned)
+- Tabbed panel — **General** · **Translation** · **Game page** · **Prices** (more tabs planned)
 - Steam-native dark UI; every change persists across reloads
 - Interface language: Auto (browser) or one of **10 locales** — English,
   Русский, Deutsch, Español, Français, Português (Brasil), 简体中文, 日本語,
@@ -88,6 +88,32 @@ Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](docs/DEVEL
 - Target language: Auto (Steam / browser language) or one of 14 common
   languages
 - Per-scope on/off switches; global master switch
+
+**Game page** (store game pages):
+
+- Hide the blocks you never read — screenshots & trailers, buy options &
+  bundles, About This Game, DLC list, system requirements, user reviews,
+  curators, events & announcements, details sidebar, franchise &
+  recommendations
+- Master switch plus per-block toggles; nothing is hidden by default
+- Pure-CSS hiding that survives Steam re-renders and page navigation
+
+**Regional prices** (store game pages):
+
+- Compare the game price across 24 Steam store regions right on the game
+  page — your own store price pinned first, cheapest region highlighted,
+  savings shown against your price
+- Fully configurable: master + auto-load switches, region picker,
+  placement (above buy options / sidebar / below description), default row
+  order with clickable table headers (click sorts, click again flips
+  direction), and per-element display toggles (original price, discount
+  badge, savings, cheapest highlight, own-price row)
+- Steam's own formatted prices, Steam-green discount badges, 1-hour cache
+  with manual refresh; free games hide the block automatically
+- Live currency conversion (ExchangeRate-API + jsDelivr fallback, cache
+  with configurable lifetime, status and manual clear in settings): every
+  price converts into your store currency automatically or any chosen one,
+  with the rates source stamped under the block
 
 Under the hood: a per-provider translation cache with TTL and LRU storage
 trim plus a concurrency-limited request queue — fast on repeat visits, gentle

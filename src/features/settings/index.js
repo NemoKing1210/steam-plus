@@ -2,16 +2,20 @@ import { getDefaults, SCRIPT_NAME } from '../../core/constants.js';
 import { getSettings } from '../../core/settings.js';
 import { on } from '../../core/bus.js';
 import { t } from '../../i18n/index.js';
-import { registerTab, togglePanel } from './panel.js';
+import { registerPage, togglePanel } from './panel.js';
 import { generalTab } from './tabs/general.js';
 import { translationTab } from './tabs/translation.js';
+import { gamepageTab } from './tabs/gamepage.js';
+import { pricesTab } from './tabs/prices.js';
 import { cacheTab } from './tabs/cache-pane.js';
 import { aboutTab } from './tabs/about.js';
 
-registerTab(generalTab);
-registerTab(translationTab);
-registerTab(cacheTab);
-registerTab(aboutTab);
+registerPage(generalTab);
+registerPage(translationTab);
+registerPage(gamepageTab);
+registerPage(pricesTab);
+registerPage(cacheTab);
+registerPage(aboutTab);
 
 const BUTTON_ID = 'sp-settings-btn';
 
@@ -155,6 +159,8 @@ export function initSettingsFeature() {
   observeHeader();
   // Keep the header fallback dot in sync with persisted settings.
   on('settings:translation', updateSettingsButtonState);
+  on('settings:gamepage', updateSettingsButtonState);
+  on('settings:prices', updateSettingsButtonState);
   on('settings:language', updateSettingsButtonState);
   if (typeof GM_registerMenuCommand === 'function') {
     GM_registerMenuCommand(t('menu.settings'), () => togglePanel(true));

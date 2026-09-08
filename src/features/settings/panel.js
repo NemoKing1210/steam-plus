@@ -8,16 +8,17 @@ import { paintCachePane } from './tabs/cache-pane.js';
 import { clearTranslationCache } from '../../translation/cache.js';
 import { confirmDialog } from './confirm.js';
 import { showToast } from '../../ui/toast.js';
-import { refreshSegmented } from './controls.js';
+import { getIconSvg, refreshSegmented } from './controls.js';
 
 /**
- * Tabbed settings panel shell in the style of steam-gamestatus: sticky
- * header with a subtitle, tab strip, scrollable body and a sticky footer
- * with Reset / Cancel / Save. Tabs render into a mutable draft; nothing is
+ * Settings panel shell in the style of steam-gamestatus: sticky header with
+ * title + close, a home screen listing the settings pages vertically, a
+ * scrollable body with a per-page back crumb, and a sticky footer with
+ * Reset / Cancel / Save. Pages render into a mutable draft; nothing is
  * persisted until Save.
  */
-const tabs = new Map();
-let activeTabId = null;
+const pages = new Map();
+let activePageId = null;
 let panelOpen = false;
 let draft = null;
 let escapeListenerInstalled = false;
@@ -37,84 +38,117 @@ function installEscapeClose() {
   if (escapeListenerInstalled) return;
   escapeListenerInstalled = true;
   document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') return;
-    if (panelOpen) togglePanel(false);
+    if (event.key !== 'Escape' || !panelOpen) return;
+    if (activePageId) showHome();
+    else togglePanel(false);
   });
 }
 
-export function registerTab(tab) {
-  if (!tab?.id || typeof tab.renderInto !== 'function') return;
-  tabs.set(tab.id, tab);
-  if (!activeTabId) activeTabId = tab.id;
+export function registerPage(page) {
+  if (!page?.id || typeof page.renderInto !== 'function') return;
+  pages.set(page.id, page);
 }
 
-function renderTabsHeader(header) {
-  const indicator = header.querySelector('.sp-panel__tabs-indicator')
-    ?? el('span', 'sp-panel__tabs-indicator');
-  indicator.setAttribute('aria-hidden', 'true');
-  header.replaceChildren();
-  for (const [id, tab] of tabs) {
-    const tabButton = el('button', 'sp-panel__tab', t(tab.titleKey));
-    tabButton.type = 'button';
-    tabButton.setAttribute('role', 'tab');
-    tabButton.dataset.spTab = id;
-    const active = id === activeTabId;
-    tabButton.classList.toggle('is-active', active);
-    tabButton.setAttribute('aria-selected', String(active));
-    if (id === 'cache') {
-      tabButton.appendChild(el('span', 'sp-panel__tab-badge', ''));
-      tabButton.querySelector('.sp-panel__tab-badge').dataset.spCacheTabBadge = '';
+function buildHomeView() {
+  const home = el('div', 'sp-panel__view sp-panel__home');
+  const list = el('nav', 'sp-panel__nav');
+  list.setAttribute('aria-label', t('menu.settings'));
+
+  for (const [id, page] of pages) {
+    const item = el('button', 'sp-panel__nav-item');
+    item.type = 'button';
+
+    if (page.icon && getIconSvg(page.icon)) {
+      const icon = el('span', 'sp-panel__nav-icon');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = getIconSvg(page.icon);
+      item.appendChild(icon);
     }
-    tabButton.addEventListener('click', () => switchPanelTab(id));
-    header.appendChild(tabButton);
+
+    const text = el('span', 'sp-panel__nav-text');
+    text.appendChild(el('span', 'sp-panel__nav-title', t(page.titleKey)));
+    if (page.descKey) {
+      text.appendChild(el('span', 'sp-panel__nav-desc', t(page.descKey)));
+    }
+    item.appendChild(text);
+
+    if (id === 'cache') {
+      const badge = el('span', 'sp-panel__tab-badge');
+      badge.dataset.spCacheTabBadge = '';
+      item.appendChild(badge);
+    }
+    item.appendChild(el('span', 'sp-panel__nav-chevron', '›'));
+
+    item.addEventListener('click', () => switchPanelPage(id));
+    list.appendChild(item);
   }
-  header.appendChild(indicator);
-  positionTabIndicator();
+
+  home.appendChild(list);
+  return home;
 }
 
-function positionTabIndicator() {
-  const overlay = document.getElementById('sp-panel-overlay');
-  const header = overlay?.querySelector('.sp-panel__tabs');
-  const indicator = header?.querySelector('.sp-panel__tabs-indicator');
-  const active = header?.querySelector('.sp-panel__tab.is-active');
-  if (!header || !indicator || !active) return;
-  requestAnimationFrame(() => {
-    const offset = active.offsetLeft - header.scrollLeft;
-    indicator.style.width = `${active.offsetWidth}px`;
-    indicator.style.transform = `translateX(${offset}px)`;
-  });
+function buildPageView(id) {
+  const page = pages.get(id);
+  if (!page) return buildHomeView();
+
+  const view = el('div', 'sp-panel__view sp-panel__page');
+  const crumb = el('div', 'sp-panel__crumb');
+  const back = el('button', 'sp-panel__back', `‹ ${t('panel.back')}`);
+  back.type = 'button';
+  back.setAttribute('aria-label', t('panel.back'));
+  back.addEventListener('click', showHome);
+  crumb.append(back, el('span', 'sp-panel__crumb-title', t(page.titleKey)));
+  view.appendChild(crumb);
+
+  const content = el('div', 'sp-panel__page-content');
+  page.renderInto(content, draft);
+  view.appendChild(content);
+  return view;
 }
 
-function renderPanes(body) {
-  body.replaceChildren();
-  for (const [id, tab] of tabs) {
-    const pane = el('div', 'sp-panel__tabpane');
-    pane.dataset.spPane = id;
-    pane.setAttribute('role', 'tabpanel');
-    if (id !== activeTabId) pane.hidden = true;
-    tab.renderInto(pane, draft);
-    body.appendChild(pane);
-  }
+function mountView(body, view, dir) {
+  body.dataset.spDir = dir;
+  body.replaceChildren(view);
+  body.scrollTop = 0;
 }
 
-function fillPanelForm() {
+function renderCurrentView() {
   const overlay = document.getElementById('sp-panel-overlay');
   if (!overlay || !draft) return;
   const body = overlay.querySelector('.sp-panel__body');
-  body.dataset.spDir = 'fwd';
-  renderTabsHeader(overlay.querySelector('.sp-panel__tabs'));
-  renderPanes(body);
+  const view = activePageId ? buildPageView(activePageId) : buildHomeView();
+  mountView(body, view, activePageId ? 'fwd' : 'back');
   paintCachePane(overlay);
   requestAnimationFrame(() => refreshSegmented(overlay));
+}
+
+export function showHome() {
+  activePageId = null;
+  renderCurrentView();
+}
+
+export function switchPanelPage(id) {
+  const overlay = document.getElementById('sp-panel-overlay');
+  if (!overlay || !pages.has(id) || !draft || id === activePageId) return;
+  activePageId = id;
+  renderCurrentView();
 }
 
 function persistPanelForm() {
   if (!draft) return;
   const previousTarget = getSettings().translation.targetLanguage;
-  saveSettings({ language: draft.language, translation: draft.translation });
+  saveSettings({
+    language: draft.language,
+    translation: draft.translation,
+    gamepage: draft.gamepage,
+    prices: draft.prices,
+    toasts: draft.toasts,
+  });
   configureLocale(draft.language);
   emit('settings:language', draft.language);
   emit('settings:translation');
+  emit('settings:gamepage');
+  emit('settings:prices');
   // Cached translations belong to the previous target language.
   if (draft.translation.targetLanguage !== previousTarget) {
     clearTranslationCache();
@@ -156,9 +190,6 @@ function ensurePanel() {
   closeButton.setAttribute('aria-label', t('common.close'));
   header.appendChild(closeButton);
 
-  const tabsHeader = el('div', 'sp-panel__tabs');
-  tabsHeader.setAttribute('role', 'tablist');
-
   const body = el('div', 'sp-panel__body');
 
   const footer = el('div', 'sp-panel__footer');
@@ -176,12 +207,9 @@ function ensurePanel() {
   footerActions.append(resetButton, cancelButton, saveButton);
   footer.appendChild(footerActions);
 
-  panel.append(header, tabsHeader, body, footer);
+  panel.append(header, body, footer);
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
-  window.addEventListener('resize', () => {
-    if (panelOpen) positionTabIndicator();
-  });
 
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) {
@@ -205,7 +233,7 @@ function ensurePanel() {
       }).then((confirmed) => {
         if (!confirmed || !draft) return;
         draft = getDefaults();
-        fillPanelForm();
+        renderCurrentView();
       });
       return;
     }
@@ -226,25 +254,6 @@ function ensurePanel() {
   });
 }
 
-export function switchPanelTab(id) {
-  const overlay = document.getElementById('sp-panel-overlay');
-  if (!overlay || !tabs.has(id) || id === activeTabId) return;
-  const order = [...tabs.keys()];
-  const body = overlay.querySelector('.sp-panel__body');
-  if (body) body.dataset.spDir = order.indexOf(id) > order.indexOf(activeTabId) ? 'fwd' : 'back';
-  activeTabId = id;
-  overlay.querySelectorAll('[data-sp-tab]').forEach((tab) => {
-    const active = tab.dataset.spTab === id;
-    tab.classList.toggle('is-active', active);
-    tab.setAttribute('aria-selected', String(active));
-  });
-  overlay.querySelectorAll('[data-sp-pane]').forEach((pane) => {
-    pane.hidden = pane.dataset.spPane !== id;
-  });
-  positionTabIndicator();
-  requestAnimationFrame(() => refreshSegmented(overlay));
-}
-
 export function togglePanel(force) {
   ensurePanel();
   const overlay = document.getElementById('sp-panel-overlay');
@@ -258,7 +267,8 @@ export function togglePanel(force) {
 
   if (panelOpen) {
     draft = JSON.parse(JSON.stringify(getSettings()));
-    fillPanelForm();
+    activePageId = null;
+    renderCurrentView();
   } else {
     draft = null;
   }

@@ -27,6 +27,14 @@ export const Codes = {
   CACHE_PERSIST: 'SP-1211',
   /** A target selector threw during a DOM scan. */
   BAD_SELECTOR: 'SP-1220',
+  /** A regional price request failed (network, timeout, HTTP status). */
+  PRICE_REQUEST: 'SP-1310',
+  /** A regional price response was unusable. */
+  PRICE_RESPONSE: 'SP-1311',
+  /** Exchange rates could not be loaded from any provider. */
+  FX_RATES: 'SP-1313',
+  /** Reading or writing the regional price cache failed. */
+  PRICE_CACHE: 'SP-1312',
 };
 
 const BADGE_STYLE =

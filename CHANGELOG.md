@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-08
+
+### Changed
+
+- Settings panel navigation redesigned: the header tab strip is replaced by a home screen with a vertical list of page buttons (icon, title, description, chevron) that open dedicated settings pages with a back crumb; Escape returns home before closing
+
+## [0.9.2] - 2026-09-08
+
+### Changed
+
+- Regional prices block moved to the top of the purchase area (above the buy options instead of below); the position option is renamed accordingly
+
+## [0.9.1] - 2026-09-08
+
+### Added
+
+- Exchange rates cache settings: configurable cache lifetime (1 hour – 7 days), live cached-rates status with provider and date, and a clear-cache button in the Conversion section — rates load once and are reused instead of requested on every page
+
+## [0.9.0] - 2026-09-08
+
+### Changed
+
+- Regional prices block rebuilt as a real table (region · price · discount · savings) with clickable sortable headers — click sorts, click again flips the direction; the own-price row stays pinned on top, discount/savings columns hide when empty
+
+## [0.8.0] - 2026-09-08
+
+### Added
+
+- Currency conversion for regional prices: every price converts into your store currency automatically (or any of 21 chosen currencies, or off) via live exchange rates (ExchangeRate-API with jsDelivr fallback, 24-hour cache, source stamped under the block); ranking, cheapest highlight and savings now use live rates instead of approximate ones
+
+## [0.7.0] - 2026-09-08
+
+### Added
+
+- Regional prices on store game pages: compare the game across 24 Steam store regions with your own price pinned first, cheapest-region highlight, and savings vs your price; new Prices settings tab (master + auto-load switches, region picker, placement above buy options / sidebar / below description, row ordering, per-element display toggles); Steam-native block with Steam-formatted prices, 1-hour cache and refresh; hidden automatically for free games
+
+## [0.6.0] - 2026-09-08
+
+### Added
+
+- Game page feature: hide key blocks on Steam store game pages (`/app/<id>`), with a master switch and per-block toggles (screenshots & trailers, buy options & bundles, About This Game, DLC, system requirements, user reviews, curators, events & announcements, details sidebar, franchise & recommendations) in a new Game page settings tab; CSS-driven hiding survives Steam re-renders and navigation, nothing hidden by default
+
+### Fixed
+
+- Toast notification preferences (position, auto-hide) are now persisted on Save instead of silently discarded
+
+## [0.5.3] - 2026-09-08
+
+### Added
+
+- Steam favicon (`@icon`) in the userscript metadata
+
 ## [0.5.2] - 2026-09-08
 
 ### Changed
@@ -117,6 +169,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings entry: native Steam account-dropdown menu item when signed in, compact Steam-blue header button (with a state dot) as the fallback on logged-out pages
 - Settings panel restyled to Steam chrome: version chip and × close in the header, uppercase tab strip, sectioned content cards, Steam-style switches, selects, segmented controls and buttons; translation settings grouped into Engine / Behavior / Scopes sections
 
+[0.10.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.10.0
+[0.9.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.9.2
+[0.9.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.9.1
+[0.9.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.9.0
+[0.8.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.8.0
+[0.7.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.7.0
+[0.6.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.6.0
+[0.5.3]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.5.3
 [0.5.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.5.2
 [0.5.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.5.1
 [0.5.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.5.0

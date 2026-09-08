@@ -10,7 +10,7 @@
 // @name:ko            Steam Plus
 // @name:pl            Steam Plus
 // @namespace          https://github.com/NemoKing1210/steam-plus
-// @version            0.5.2
+// @version            0.10.0
 // @author             NemoKing1210
 // @description        Improves Steam functionality
 // @description:ru     Улучшает функционал Steam
@@ -23,6 +23,7 @@
 // @description:ko     Steam 기능 개선
 // @description:pl     Poprawia funkcjonalność Steam
 // @license            MIT
+// @icon               https://store.steampowered.com/favicon.ico
 // @homepage           https://github.com/NemoKing1210/steam-plus
 // @homepageURL        https://github.com/NemoKing1210/steam-plus
 // @source             https://github.com/NemoKing1210/steam-plus.git
@@ -34,7 +35,10 @@
 // @tag                steam
 // @tag                translation
 // @connect            translate.googleapis.com
+// @connect            open.er-api.com
+// @connect            cdn.jsdelivr.net
 // @grant              GM_addStyle
+// @grant              GM_deleteValue
 // @grant              GM_getValue
 // @grant              GM_info
 // @grant              GM_registerMenuCommand

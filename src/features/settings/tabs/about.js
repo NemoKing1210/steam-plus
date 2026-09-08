@@ -7,6 +7,8 @@ import { getScriptVersion } from '../panel.js';
 export const aboutTab = {
   id: 'about',
   titleKey: 'tab.about',
+  icon: 'info',
+  descKey: 'tab.about.desc',
   renderInto(pane) {
     const about = el('div', 'sp-about');
     const hero = el('div', 'sp-about__hero');

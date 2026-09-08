@@ -58,6 +58,48 @@ function normalizeToasts(raw, fallback) {
   };
 }
 
+function normalizeGamepage(raw, fallback) {
+  const hidden = { ...fallback.hidden };
+  for (const key of Object.keys(hidden)) {
+    hidden[key] = raw?.hidden?.[key] === true;
+  }
+  return {
+    enabled: raw?.enabled !== false,
+    hidden,
+  };
+}
+
+const PRICE_POSITIONS = ['purchase', 'sidebar', 'description'];
+const PRICE_SORTS = ['custom', 'priceAsc', 'discountDesc'];
+const FX_TTLS = [3600000, 21600000, 86400000, 604800000];
+
+function normalizeConvertTo(value, fallback) {
+  if (value === 'auto' || value === 'off') return value;
+  if (typeof value === 'string' && /^[A-Za-z]{3}$/.test(value)) return value.toUpperCase();
+  return fallback;
+}
+
+function normalizePrices(raw, fallback) {
+  const regions = Array.isArray(raw?.regions)
+    ? [...new Set(raw.regions.map((code) => String(code).toUpperCase()))]
+    : [...fallback.regions];
+  return {
+    enabled: raw?.enabled !== false,
+    autoLoad: raw?.autoLoad !== false,
+    regions,
+    position: PRICE_POSITIONS.includes(raw?.position) ? raw.position : fallback.position,
+    sort: PRICE_SORTS.includes(raw?.sort) ? raw.sort : fallback.sort,
+    showOriginal: raw?.showOriginal !== false,
+    showDiscount: raw?.showDiscount !== false,
+    showSavings: raw?.showSavings !== false,
+    highlightCheapest: raw?.highlightCheapest !== false,
+    showHomeRow: raw?.showHomeRow !== false,
+    convertTo: normalizeConvertTo(raw?.convertTo, fallback.convertTo),
+    showConverted: raw?.showConverted !== false,
+    fxTtl: FX_TTLS.includes(Number(raw?.fxTtl)) ? Number(raw.fxTtl) : fallback.fxTtl,
+  };
+}
+
 function normalizeTranslation(raw, fallback) {
   return {
     enabled: raw?.enabled !== false,
@@ -86,6 +128,8 @@ export function loadSettings() {
   return {
     language: normalizeLocale(raw.language, fallback.language),
     translation: normalizeTranslation(raw.translation, fallback.translation),
+    gamepage: normalizeGamepage(raw.gamepage, fallback.gamepage),
+    prices: normalizePrices(raw.prices, fallback.prices),
     toasts: normalizeToasts(raw.toasts, fallback.toasts),
   };
 }
@@ -101,6 +145,14 @@ export function getTranslationSettings() {
   return settings.translation;
 }
 
+export function getGamepageSettings() {
+  return settings.gamepage;
+}
+
+export function getPricesSettings() {
+  return settings.prices;
+}
+
 /**
  * Merge a partial patch, normalize it, persist and notify subscribers.
  * @param {Partial<ReturnType<typeof loadSettings>>} patch
@@ -114,6 +166,24 @@ export function saveSettings(patch) {
     );
   }
   settings = next;
+  if (patch.gamepage) {
+    settings = {
+      ...settings,
+      gamepage: normalizeGamepage(
+        { ...settings.gamepage, ...patch.gamepage },
+        getDefaults().gamepage,
+      ),
+    };
+  }
+  if (patch.prices) {
+    settings = {
+      ...settings,
+      prices: normalizePrices(
+        { ...settings.prices, ...patch.prices },
+        getDefaults().prices,
+      ),
+    };
+  }
   if (patch.toasts) {
     settings = {
       ...settings,
