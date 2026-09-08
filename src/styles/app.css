@@ -1549,7 +1549,137 @@ html.sp-modal-open body {
   animation: sp-spin 0.7s linear infinite;
 }
 
-/* == Focus + motion ========================================================= */
+.sp-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 30px;
+  padding: 0 10px;
+  font: inherit;
+  color: var(--sp-text-strong);
+  background: var(--sp-field);
+  border: 1px solid var(--sp-border);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+.sp-input::placeholder {
+  color: var(--sp-text-muted);
+}
+.sp-input:focus {
+  background: var(--sp-field-active);
+  outline: 1px solid var(--sp-accent);
+  outline-offset: -1px;
+}
+.sp-input[type="password"] {
+  letter-spacing: 0.08em;
+}
+
+.sp-region-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font: 12px/1.4 "Motiva Sans", Arial, Helvetica, sans-serif;
+  color: var(--sp-text);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--sp-border);
+  border-left: 3px solid var(--sp-accent);
+  border-radius: 0 3px 3px 0;
+  box-shadow: inset 0 1px 0 var(--sp-highlight);
+}
+.sp-region-banner__badge {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sp-accent);
+}
+.sp-region-banner__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sp-region-banner__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sp-text-strong);
+}
+.sp-region-banner__details {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--sp-text-muted);
+}
+.sp-region-banner__reload {
+  flex: 0 0 auto;
+}
+.sp-region-offer,
+.sp-region-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px auto;
+  padding: 14px 16px;
+  max-width: 640px;
+  font: 12px/1.4 "Motiva Sans", Arial, Helvetica, sans-serif;
+  color: var(--sp-text);
+  background: linear-gradient(180deg, var(--sp-bg-1), var(--sp-bg-2));
+  border: 1px solid var(--sp-border);
+  border-radius: 3px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 var(--sp-highlight);
+}
+.sp-region-status--error {
+  border-left: 3px solid var(--sp-danger);
+}
+.sp-region-offer {
+  border-left: 3px solid var(--sp-accent);
+}
+.sp-region-offer__text,
+.sp-region-status__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sp-region-offer__button,
+.sp-region-status__retry {
+  flex: 0 0 auto;
+}
+.sp-region-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.sp-region-loader.is-visible {
+  opacity: 1;
+}
+.sp-region-loader__card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  color: var(--sp-text);
+  background: linear-gradient(180deg, var(--sp-bg-1), var(--sp-bg-2));
+  border: 1px solid var(--sp-border);
+  border-radius: 3px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), inset 0 1px 0 var(--sp-highlight);
+}
+.sp-region-loader__spinner {
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid rgba(102, 192, 244, 0.3);
+  border-top-color: var(--sp-accent);
+  animation: sp-spin 0.7s linear infinite;
+}
+.sp-region-loader__text {
+  font-size: 12px;
+}
+
 .sp-panel-overlay a:focus-visible,
 .sp-panel-overlay button:focus-visible,
 .sp-panel-overlay select:focus-visible,
@@ -1565,7 +1695,10 @@ html.sp-modal-open body {
 .sp-toast__close:focus-visible,
 .sp-prices__refresh:focus-visible,
 .sp-prices__sort:focus-visible,
-.sp-prices .sp-button:focus-visible {
+.sp-prices .sp-button:focus-visible,
+.sp-region-banner__reload:focus-visible,
+.sp-region-offer__button:focus-visible,
+.sp-region-status__retry:focus-visible {
   outline: 1px solid var(--sp-accent);
   outline-offset: 2px;
 }
@@ -1581,9 +1714,9 @@ html.sp-modal-open body {
   .sp-confirm,
   .sp-toast,
   .sp-toast--leaving,
-  .sp-toast__progress span,
   .sp-translate-btn__spinner,
   .sp-prices__spinner,
+  .sp-region-loader__spinner,
   .sp-switch__track,
   .sp-switch__track::after,
   .sp-segmented__option,

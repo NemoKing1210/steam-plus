@@ -7,6 +7,7 @@ import { generalTab } from './tabs/general.js';
 import { translationTab } from './tabs/translation.js';
 import { gamepageTab } from './tabs/gamepage.js';
 import { pricesTab } from './tabs/prices.js';
+import { regionTab } from './tabs/region.js';
 import { cacheTab } from './tabs/cache-pane.js';
 import { aboutTab } from './tabs/about.js';
 
@@ -14,6 +15,7 @@ registerPage(generalTab);
 registerPage(translationTab);
 registerPage(gamepageTab);
 registerPage(pricesTab);
+registerPage(regionTab);
 registerPage(cacheTab);
 registerPage(aboutTab);
 

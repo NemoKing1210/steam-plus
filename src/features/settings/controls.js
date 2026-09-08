@@ -204,6 +204,20 @@ export function createNumberInput({ value, min = 0, max = 120, step = 1, onChang
   return input;
 }
 
+export function createTextInput({ value = '', placeholder = '', maxLength = 253, onChange, inputMode = 'text', type = 'text' }) {
+  const input = document.createElement('input');
+  input.type = type === 'password' ? 'password' : 'text';
+  input.className = 'sp-input';
+  input.value = value ?? '';
+  if (placeholder) input.placeholder = placeholder;
+  if (maxLength) input.maxLength = maxLength;
+  if (inputMode && inputMode !== 'text') input.inputMode = inputMode;
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('spellcheck', 'false');
+  input.addEventListener('change', () => onChange(input.value));
+  return input;
+}
+
 export function createButton(labelText, onClick, className = '') {
   const button = el('button', `sp-button ${className}`.trim(), labelText);
   button.type = 'button';

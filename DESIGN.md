@@ -265,7 +265,6 @@ border plus the ON `.sp-pill`; the visitor's own price row gets a faint
 accent wash. Loading uses the ring spinner; errors and the manual-load
 button reuse `.sp-button` tones. The rates source line (`prices.fxHint`)
 stays hidden unless rates actually feed something visible.
-
 ### Translation UI (`.sp-translate-btn`, `.sp-translation`)
 Inline per-block control: icon + label in translucent accent fill
 (`rgba(103,193,245,.2)`) with a 1px `--sp-accent` border and accent text;
@@ -280,16 +279,27 @@ Yes/No/Funny/Award row). Buttons stay hidden (`--pending`) until near
 the viewport. Result box:
 translucent accent wash, 3px accent left border, rounded right corners.
 
-Translations keep the original layout (`.sp-translation-rich`): content is
-split into blocks (paragraphs, headings, list items) translated separately
-while links, images, embeds, line breaks, emoji and code keep their nodes.
-Below mode renders a structural mirror of the source — same headings,
-link targets, lists (`.sp-translation__list`) and media, with `lang` set to
-the target language; replace mode swaps each block's content in place so
-the page structure never changes, and toggling back (or tearing down)
-restores the original DOM from a snapshot. Translated links keep the
-accent color with an underline, images scale to the box width, and code
-keeps the sunken `--sp-bg-deep` well styling.
+### Text input (`.sp-input`)
+Single-line Steam form control matching `.sp-select`: fill `--sp-field`
+(focus `--sp-field-active`), 1px black border with the faint white inner
+ring, 30px height, 2px radius, inherited font, white text, muted
+placeholder. Password variant only widens letter spacing; no custom
+reveals or strength meters.
+
+### Region bypass (`.sp-region-*`)
+Guest reload of store pages Steam blocks with “unavailable in your region”.
+No chrome on healthy pages: the feature only renders when detection fires.
+Manual mode shows a centered offer card (`.sp-region-offer`, accent left
+border, text + primary action); auto mode goes straight to the fullscreen
+loader (`.sp-region-loader`, dimmed backdrop, panel-styled card with a ring
+spinner and `region.loading`). Failures render a centered status card
+(`.sp-region-status`, danger left border on `--error`, text + ghost Retry).
+Injected content keeps Steam's own wrappers (`.game_page_background` /
+`#tabletGrid`), so the store layout applies untouched; the only addition is
+a sunken notice banner (`.sp-region-banner`) docked at the top of the grid:
+uppercase accent badge, bold white title, muted details line (proxy/cache
+source appended when true) and a ghost Reload action. All four classes stay
+excluded from content scans via `isOwnUi()` and the observer filter.
 
 ## 6. Motion
 

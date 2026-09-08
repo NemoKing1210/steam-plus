@@ -7,8 +7,8 @@ import { debounce, isOwnUi } from './utils/dom.js';
 import { initSettingsFeature } from './features/settings/index.js';
 import { initGamepageFeature } from './features/gamepage/index.js';
 import { initPricesFeature } from './features/prices/index.js';
+import { initRegionFeature } from './features/region/index.js';
 import { persistCacheNow } from './translation/cache.js';
-import { persistPriceCacheNow } from './features/prices/cache.js';
 import {
   initTranslationEngine,
   scanForTranslatable,
@@ -37,6 +37,7 @@ function init() {
   initSettingsFeature();
   initGamepageFeature();
   initPricesFeature();
+  initRegionFeature();
   initTranslationEngine();
   window.addEventListener('pagehide', persistCacheNow);
   window.addEventListener('pagehide', persistPriceCacheNow);
@@ -46,7 +47,7 @@ function init() {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (node.nodeType !== Node.ELEMENT_NODE) continue;
-        if (node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-prices')) continue;
+        if (node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-prices, .sp-region-banner, .sp-region-offer, .sp-region-status, .sp-region-loader, .sp-region-shell')) continue;
         pendingScanNodes.push(node);
       }
     }

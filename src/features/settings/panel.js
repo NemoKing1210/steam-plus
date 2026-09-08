@@ -142,6 +142,7 @@ function persistPanelForm() {
     translation: draft.translation,
     gamepage: draft.gamepage,
     prices: draft.prices,
+    region: draft.region,
     toasts: draft.toasts,
   });
   configureLocale(draft.language);
@@ -149,7 +150,7 @@ function persistPanelForm() {
   emit('settings:translation');
   emit('settings:gamepage');
   emit('settings:prices');
-  // Cached translations belong to the previous target language.
+  emit('settings:region');
   if (draft.translation.targetLanguage !== previousTarget) {
     clearTranslationCache();
     showToast({

@@ -64,16 +64,24 @@ steam-plus/
 │   │   │   ├── cache.js    # GM-backed price cache (1h TTL)
 │   │   │   ├── ui.js       # Comparison block renderer (states + rows)
 │   │   │   └── index.js    # Mount/teardown, anchors, bus listener
+│   │   ├── region/
+│   │   │   ├── detect.js   # Region-error detection + store page ids
+│   │   │   ├── request.js  # Anonymous guest fetch (cookies, cc, proxy URL)
+│   │   │   ├── cache.js    # GM-backed guest HTML cache (minutes TTL)
+│   │   │   ├── inject.js   # Error-shell clear + guest layout/asset/banner inject
+│   │   │   ├── bypass.js   # Guest fetch → parse → inject orchestrator
+│   │   │   └── index.js    # Detection lifecycle, URL watcher, bus listener
 │   │   └── settings/
 │   │       ├── index.js    # Settings entry: account-menu item + header
 │   │       │               #   fallback button, GM menu command, pages
 │   │       ├── panel.js    # Panel shell: home nav + pages (registerPage / togglePanel)
-│   │       ├── controls.js # Row / switch / select / segmented / checkbox / button
+│   │       ├── controls.js # Row / switch / select / segmented / text / button
 │   │       └── tabs/
 │   │           ├── general.js       # Interface language, toasts, reset
 │   │           ├── translation.js   # Enabled, provider, trigger, display, scopes
 │   │           ├── gamepage.js      # Master switch + per-block hide grid
-│   │           └── prices.js        # Regions, position, sort, display toggles
+│   │           ├── prices.js        # Regions, position, sort, display toggles
+│   │           └── region.js        # Mode, country, guest cache, proxy gateway
 │   ├── styles/
 │   │   ├── tokens.css      # :root design tokens (sp- palette — DESIGN.md)
 │   │   └── app.css         # Injected styles, sp- prefix (GM_addStyle via build)
@@ -99,8 +107,9 @@ steam-plus/
 Owns the single page-level `MutationObserver` and the debounced scan loop:
 
 - `init()`: `configureLocale(getSettings().language)` →
-  `initSettingsFeature()` → `initTranslationEngine()` → `pagehide` cache
-  flush hook → initial `scheduleScan()` → observer attach.
+  `initSettingsFeature()` → `initGamepageFeature()` → `initPricesFeature()` →
+  `initRegionFeature()` → `initTranslationEngine()` → `pagehide` cache
+  flush hooks → initial `scheduleScan()` → observer attach.
 - `runScan()` drains `pendingScanNodes`; the first scan is a full-document
   pass (`hasInitialScan` drops the collected nodes), later scans process only
   added nodes. Nodes belonging to our own UI are skipped via `isOwnUi()`.
@@ -116,11 +125,15 @@ watchers through the existing pipeline.
 Single place for magic values. Notable entries:
 
 - `SCRIPT_NAME`, storage keys `SETTINGS_KEY = 'sp_settings_v1'`,
-  `TRANSLATION_CACHE_KEY = 'sp_translation_cache_v1'`.
+  `TRANSLATION_CACHE_KEY = 'sp_translation_cache_v1'`,
+  `PRICES_CACHE_KEY = 'sp_prices_cache_v1'`,
+  `REGION_CACHE_KEY = 'sp_region_cache_v1'`.
 - Translation limits: `TRANSLATION_CACHE_TTL_MS` (7 days),
   `TRANSLATION_CACHE_MAX_ENTRIES` (2000, LRU trim),
   `MAX_CONCURRENT_REQUESTS` (3), `MAX_REQUEST_TEXT_LENGTH` (4000 chars,
   hard-split), `SCAN_DEBOUNCE_MS` (450), `CACHE_PERSIST_MS` (1000).
+- Region limits: `REGION_CACHE_MAX_ENTRIES` (30, newest-first prune, cap 100),
+  `REGION_CACHE_MINUTES_MAX` (10080), `REGION_REQUEST_TIMEOUT_MS` (45000).
 - `DEFAULT_TRANSLATION` and `DEFAULT_SETTINGS` (defaults for `language` and
   the whole `translation` block); `getDefaults()` returns a deep clone (the
   objects are shared constants — never mutate them directly).
@@ -157,6 +170,8 @@ Minimal pub/sub: `on(event, fn)` (returns an unsubscribe fn), `off`,
   hiding stylesheet (`applyGamepageSettings`).
 - `settings:prices` — emitted by the panel footer Save as well. The prices
   feature listens and remounts its comparison block (`applyPricesSettings`).
+- `settings:region` — emitted by the panel footer Save as well. The region
+  feature listens and re-evaluates the current page (`applyRegionSettings`).
 
 ### `src/core/debug.js` — diagnostics
 
@@ -344,6 +359,29 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   row stays pinned); remounts on `settings:prices` and store navigation;
   hides itself for free games.
 
+### `src/features/region/` — region-blocked store pages via guest fetch
+
+- `detect.js`: `REGION_PATTERNS` (multilingual “unavailable in your region”
+  matchers), `isRegionBlockedPage(root)`, `isSupportedStoreUrl()` (`/app/`,
+  `/bundle/`, `/sub/` on the store), `getStorePageId()`, `isHostLoggedIn()`.
+- `request.js`: `buildTargetUrl()` (strip `snr`, set `?l=` from the Steam
+  language, optional `?cc=`), `buildRequestUrl()` / `buildProxyBase()`
+  (gateway / path / query modes), age-gate + `Steam_Language` cookies and
+  `Accept-Language` headers, `guestFetch()` (`GM_xmlhttpRequest` with
+  `anonymous: true`, Basic auth only for the proxy).
+- `cache.js`: GM-backed guest HTML cache (`sp_region_cache_v1`, minutes TTL,
+  max entries, newest-first prune) with stats/byte helpers for the tab.
+- `inject.js`: error-shell clear, Steam wrapper-preserving guest layout
+  inject, missing app stylesheets/scripts backfill, guest inline-script
+  replay, tag-widget fixup, plus the `.sp-region-*` banner/offer/status/
+  loader UI (all excluded from scans).
+- `bypass.js`: `bypassRegionBlock({ forceRefresh })` — cache → guest fetch →
+  still-blocked/age-gate guards → inject; failures surface one coded
+  `SP-1413` log plus a status card with Retry.
+- `index.js`: `applyRegionSettings()` re-evaluates the current URL on
+  `settings:region` and store navigation; auto mode bypasses at once,
+  manual mode shows the offer card first.
+
 ### `src/i18n/`
 
 - `meta.js`: `SUPPORTED_LOCALES` (`en ru de es fr pt-BR zh-CN ja ko pl` —
@@ -354,7 +392,7 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   `navigator.languages` through aliases with base-language fallback, else
   `'en'`; `getLocale()`; `t(key, vars)` falls back `active → en → key` and
   interpolates `{name}` placeholders.
-- `locales/*.js`: one `export default { … }` map per locale (44 keys), all
+- `locales/*.js`: one `export default { … }` map per locale (same key set, 214 keys), all
   with **identical key order**; `locales/index.js` combines them into
   `TRANSLATIONS`.
 
@@ -362,7 +400,8 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
 
 `el(tag, className, text)`, `append`, `debounce`, `isOwnUi(node)` (true for
 anything inside `.sp-panel-overlay`, `.sp-settings-btn`, `.sp-translation`,
-`.sp-translate-btn`), `resolveTargetLanguage(targetSetting)` (explicit value,
+`.sp-translate-btn`, `.sp-prices`, `.sp-region-banner` / `-offer` / `-status` /
+`-loader`), `resolveTargetLanguage(targetSetting)` (explicit value,
 else Steam `<html lang>` first two letters, else `navigator.language`).
 
 ### `src/styles/tokens.css` + `src/styles/app.css`
@@ -442,6 +481,13 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `prices.convertTo` | `'auto'` | Display currency: `'auto'` (own store currency), `'off'`, or an ISO code — every price converts via live rates |
 | `prices.showConverted` | `true` | Show the converted price (`≈ …`) next to Steam's formatted price |
 | `prices.fxTtl` | `86400000` (24h) | Exchange rates cache lifetime: 1h / 6h / 24h / 7d; the Conversion section also shows the cached-rates status and a clear-cache button |
+| `region.enabled` | `true` | Master switch for reloading region-blocked store pages |
+| `region.mode` | `'auto'` | `'auto'` replaces the error page at once; `'manual'` shows an offer button first |
+| `region.countryCode` | `''` | Optional two-letter store country (`cc`) for guest requests; empty keeps your country |
+| `region.cacheMinutes` | `60` | Guest page cache lifetime, minutes (`0` disables the cache; Reload always refetches) |
+| `region.cacheMaxEntries` | `30` | Max guest pages kept (newest win, cap 100) |
+| `region.proxyEnabled` / `proxyHost` / `proxyPort` / `proxyUser` / `proxyPass` | `false` / `''` | HTTP gateway for IP-based locks (host + optional port, Basic auth) |
+| `region.proxyMode` | `'gateway'` | URL append style: `'gateway'` (`host:port/https://…`), `'path'`, `'query'` (`?url=…`) |
 | `toasts.enabled` | `true` | Master switch for toast notifications |
 | `toasts.position` | `'bottom-right'` | Toast corner: `bottom/top` × `right/left` |
 | `toasts.duration` | `5000` | Auto-hide ms (`0` = sticky until dismissed) |

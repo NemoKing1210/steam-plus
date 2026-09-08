@@ -35,6 +35,14 @@ export const Codes = {
   FX_RATES: 'SP-1313',
   /** Reading or writing the regional price cache failed. */
   PRICE_CACHE: 'SP-1312',
+  /** Region bypass guest request failed (network, timeout, HTTP status). */
+  REGION_REQUEST: 'SP-1410',
+  /** Region bypass guest response held no usable store content. */
+  REGION_RESPONSE: 'SP-1411',
+  /** Region bypass guest page cache read/write failed. */
+  REGION_CACHE: 'SP-1412',
+  /** Region bypass run failed (logged once at the outermost point). */
+  REGION_FAILED: 'SP-1413',
 };
 
 const BADGE_STYLE =

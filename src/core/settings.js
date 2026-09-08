@@ -72,6 +72,34 @@ function normalizeGamepage(raw, fallback) {
 const PRICE_POSITIONS = ['purchase', 'sidebar', 'description'];
 const PRICE_SORTS = ['custom', 'priceAsc', 'discountDesc'];
 const FX_TTLS = [3600000, 21600000, 86400000, 604800000];
+const REGION_MODES = ['auto', 'manual'];
+const REGION_PROXY_MODES = ['gateway', 'path', 'query'];
+
+function normalizeRegion(raw, fallback) {
+  const text = (value, max) => (typeof value === 'string' ? value.slice(0, max) : '');
+  const country = typeof raw?.countryCode === 'string' && /^[A-Za-z]{2}$/.test(raw.countryCode.trim())
+    ? raw.countryCode.trim().toUpperCase()
+    : '';
+  const cacheMinutes = Number.isFinite(Math.round(Number(raw?.cacheMinutes)))
+    ? Math.min(10080, Math.max(0, Math.round(Number(raw.cacheMinutes))))
+    : fallback.cacheMinutes;
+  const cacheMax = Number.isFinite(Math.round(Number(raw?.cacheMaxEntries)))
+    ? Math.min(100, Math.max(1, Math.round(Number(raw.cacheMaxEntries))))
+    : fallback.cacheMaxEntries;
+  return {
+    enabled: raw?.enabled !== false,
+    mode: REGION_MODES.includes(raw?.mode) ? raw.mode : fallback.mode,
+    countryCode: country,
+    cacheMinutes,
+    cacheMaxEntries: cacheMax,
+    proxyEnabled: raw?.proxyEnabled === true,
+    proxyHost: text(raw?.proxyHost, 253).trim(),
+    proxyPort: text(raw?.proxyPort, 5).trim(),
+    proxyUser: text(raw?.proxyUser, 128),
+    proxyPass: text(raw?.proxyPass, 256),
+    proxyMode: REGION_PROXY_MODES.includes(raw?.proxyMode) ? raw.proxyMode : fallback.proxyMode,
+  };
+}
 
 function normalizeConvertTo(value, fallback) {
   if (value === 'auto' || value === 'off') return value;
@@ -130,6 +158,7 @@ export function loadSettings() {
     translation: normalizeTranslation(raw.translation, fallback.translation),
     gamepage: normalizeGamepage(raw.gamepage, fallback.gamepage),
     prices: normalizePrices(raw.prices, fallback.prices),
+    region: normalizeRegion(raw.region, fallback.region),
     toasts: normalizeToasts(raw.toasts, fallback.toasts),
   };
 }
@@ -148,9 +177,12 @@ export function getTranslationSettings() {
 export function getGamepageSettings() {
   return settings.gamepage;
 }
-
 export function getPricesSettings() {
   return settings.prices;
+}
+
+export function getRegionSettings() {
+  return settings.region;
 }
 
 /**
@@ -181,6 +213,15 @@ export function saveSettings(patch) {
       prices: normalizePrices(
         { ...settings.prices, ...patch.prices },
         getDefaults().prices,
+      ),
+    };
+  }
+  if (patch.region) {
+    settings = {
+      ...settings,
+      region: normalizeRegion(
+        { ...settings.region, ...patch.region },
+        getDefaults().region,
       ),
     };
   }

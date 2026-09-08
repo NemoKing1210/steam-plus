@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-09-08
+
+### Added
+
+- Region bypass for store pages blocked with “unavailable in your region” (`/app/`, `/bundle/`, `/sub/`): anonymous guest fetch without account cookies (Steam language, age-gate and optional `cc` country cookies, `Accept-Language`) with direct injection of the real store layout, missing app stylesheets/scripts backfill, and a Steam-native notice banner; auto mode replaces the error page at once, manual mode shows an offer card first, failures show a status card with Retry
+- Region settings tab: master switch, auto/manual mode, optional two-letter store country override, guest page cache (configurable lifetime up to 7 days, entry limit, status line, clear button, Reload action on blocked pages), and an HTTP proxy gateway section (on/off, host, port, Basic auth, gateway/path/query URL modes) for IP-based locks
+
 ## [0.10.0] - 2026-09-08
 
 ### Changed
@@ -162,7 +169,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - DESIGN.md: Steam-native visual rules for all injected UI, referenced from AGENTS.md and CLAUDE.md
-- `src/styles/tokens.css`: shared `--sp-*` design palette consumed by the injected stylesheet
+[0.11.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.0
+[0.10.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.10.0
 
 ### Changed
 
