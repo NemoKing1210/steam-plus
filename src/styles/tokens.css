@@ -1,0 +1,20 @@
+/* Steam Plus — design tokens (see DESIGN.md). Single palette for all injected UI. */
+
+:root {
+  --sp-accent: #66c0f4;
+  --sp-accent-soft: #67c1f5;
+  --sp-accent-deep: #417a9b;
+  --sp-bg-1: #1b2838;
+  --sp-bg-2: #16202d;
+  --sp-bg-deep: #0e141b;
+  --sp-field: #316282;
+  --sp-field-active: #3d7a9c;
+  --sp-text: #c7d5e0;
+  --sp-text-strong: #ffffff;
+  --sp-text-muted: #8f98a0;
+  --sp-success: #a4d007;
+  --sp-danger: #c45c5c;
+  --sp-border: #000000;
+  --sp-line: rgba(255, 255, 255, 0.1);
+  --sp-highlight: rgba(255, 255, 255, 0.04);
+}
