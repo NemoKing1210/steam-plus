@@ -225,5 +225,8 @@ export function initPricesFeature() {
   loadPriceCache();
   applyPricesSettings();
   on('settings:prices', applyPricesSettings);
+  // Region bypass swaps the page body without changing the URL, so the
+  // navigation watcher never fires — remount into the fresh anchors here.
+  on('region:injected', applyPricesSettings);
   watchStoreNavigation(() => applyPricesSettings());
 }

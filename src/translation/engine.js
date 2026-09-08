@@ -294,6 +294,9 @@ function pruneAll() {
 export function initTranslationEngine() {
   loadMemoryCache();
   on('settings:translation', applyTranslationSettings);
+  // Guest regional content arrives without navigation or scan roots —
+  // rescan explicitly (the WeakMap dedupes live controllers).
+  on('region:injected', () => scanForTranslatable(document));
   window.addEventListener('scroll', scheduleVisibilityCheck, { passive: true });
   window.addEventListener('resize', scheduleVisibilityCheck);
 }

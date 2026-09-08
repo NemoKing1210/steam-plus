@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-09-08
+
+### Fixed
+
+- Region bypass crash (`buildTargetUrl is not defined`): the guest-request import was lost in `bypass.js`, so blocked pages failed on every run — restored, and ran an `no-undef` audit over all sources that also caught and fixed a broken `catch` clause in the same file
+
+## [0.11.2] - 2026-09-08
+
+### Fixed
+
+- Startup crash (`persistPriceCacheNow is not defined`): the price-cache flush import was lost in `main.js`, aborting `init()` before the scan loop and observer attached — the import is restored, so the script boots again
+
+## [0.11.1] - 2026-09-08
+
+### Fixed
+
+- Content features now apply to region-bypassed pages: a successful guest inject emits `region:injected`, and translation (rescan), regional prices (remount into the fresh anchors) and game-page hiding (re-apply) all refresh on it — previously the bypass left the page without translate buttons or the prices block because the URL never changes and the injected shell was excluded from scans
+
 ## [0.11.0] - 2026-09-08
 
 ### Added
@@ -159,14 +177,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - About tab in the settings panel: product hero with version chip, author card, and repository link
 
 ### Changed
-
-- Settings panel rebuilt in the steam-gamestatus style: sticky header with subtitle, sticky footer with Reset / Cancel / Save, tab fill badge, section icons, field-above-control layout, and master switches with ON/OFF pills
+[0.11.3]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.3
+[0.11.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.2
+[0.11.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.1
 - Settings are now applied via an explicit Save button (edits collect in a draft; Cancel, overlay click, or Escape discards them) instead of instant persistence on every control
 - Header fallback button and account-dropdown entry highlight while the panel is open; opening the panel hides the Steam account dropdown
 
 ## [0.1.1] - 2026-09-07
-
-### Added
+[0.11.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.1
+[0.11.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.0
 
 - DESIGN.md: Steam-native visual rules for all injected UI, referenced from AGENTS.md and CLAUDE.md
 [0.11.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.0

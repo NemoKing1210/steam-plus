@@ -1,4 +1,5 @@
 import { getSettings } from '../../core/settings.js';
+import { emit } from '../../core/bus.js';
 import { Codes, fail, logError, logInfo } from '../../core/debug.js';
 import { t } from '../../i18n/index.js';
 import { buildRequestUrl, buildTargetUrl, guestFetch } from './request.js';
@@ -82,11 +83,13 @@ export async function bypassRegionBlock(options = {}) {
       throw fail(Codes.REGION_RESPONSE, 'guest page held no store content');
     }
     if (!fromCache) writeRegionCache(targetUrl, html);
-    await injectStoreRoot(remoteGame, doc, {
-      fromCache,
-      viaProxy: !!(settings.proxyEnabled && settings.proxyHost.trim()),
-    });
+    const viaProxy = !!(settings.proxyEnabled && settings.proxyHost.trim());
+    await injectStoreRoot(remoteGame, doc, { fromCache, viaProxy });
     hideRegionLoader();
+    // The URL does not change, so content features would never notice the
+    // fresh DOM on their own — notify them explicitly (bus isolates
+    // listener failures, so one broken feature cannot block the rest).
+    emit('region:injected', { url: location.href, fromCache, viaProxy });
   } catch (error) {
     const message =
       error?.message && !/^SP-141\d/.test(String(error.message))

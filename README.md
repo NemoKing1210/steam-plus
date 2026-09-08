@@ -3,13 +3,13 @@
 [![CI](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-102436?style=for-the-badge&labelColor=66c0f4)](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/steam-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.11.0-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.11.3-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
 
 A userscript that improves the Steam Store and Steam Community with a full
 settings panel and content translation — game descriptions, reviews, profile
 comments, and news — right on the page.
 
-> **Status:** early (`0.11.0`). Settings panel (General · Translation ·
+> **Status:** early (`0.11.3`). Settings panel (General · Translation ·
 > Game page · Prices · Region) + content translation through the free Google endpoint
 > (no API key). More Steam improvements planned.
 
@@ -116,9 +116,10 @@ Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](docs/DEVEL
   language and age-gate cookies sent automatically, optional store-country
   (`cc`) override
 - Injects the real store layout directly into the page (missing app styles
-  and scripts included) with a Steam-native notice banner; auto mode
-  replaces the error page at once, manual mode shows an offer button first,
-  failures show a status card with Retry
+  and scripts included) with a Steam-native notice banner; translation,
+  regional prices and game-page hiding apply to the injected content
+  automatically; auto mode replaces the error page at once, manual mode
+  shows an offer button first, failures show a status card with Retry
 - Configurable guest-page cache (lifetime, entry limit, status, clear) and
   an optional HTTP proxy gateway (host, port, Basic auth, three URL modes)
   for IP-based locks — all in the Region settings tab

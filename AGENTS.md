@@ -172,6 +172,10 @@ Minimal pub/sub: `on(event, fn)` (returns an unsubscribe fn), `off`,
   feature listens and remounts its comparison block (`applyPricesSettings`).
 - `settings:region` — emitted by the panel footer Save as well. The region
   feature listens and re-evaluates the current page (`applyRegionSettings`).
+- `region:injected` — emitted by `bypassRegionBlock()` after the guest layout
+  lands (the URL never changes, so no watcher would fire). Translation
+  rescans, prices remounts, gamepage re-applies — the uniform refresh
+  contract every content feature honors.
 
 ### `src/core/debug.js` — diagnostics
 
@@ -375,12 +379,10 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   inject, missing app stylesheets/scripts backfill, guest inline-script
   replay, tag-widget fixup, plus the `.sp-region-*` banner/offer/status/
   loader UI (all excluded from scans).
-- `bypass.js`: `bypassRegionBlock({ forceRefresh })` — cache → guest fetch →
-  still-blocked/age-gate guards → inject; failures surface one coded
-  `SP-1413` log plus a status card with Retry.
 - `index.js`: `applyRegionSettings()` re-evaluates the current URL on
   `settings:region` and store navigation; auto mode bypasses at once,
-  manual mode shows the offer card first.
+  manual mode shows the offer card first. Success emits `region:injected`
+  (from `bypass.js`) so translation/prices/gamepage refresh on the fresh DOM.
 
 ### `src/i18n/`
 

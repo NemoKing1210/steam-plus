@@ -39,5 +39,8 @@ function watchUrlChanges() {
 export function initGamepageFeature() {
   applyGamepageSettings();
   on('settings:gamepage', applyGamepageSettings);
+  // Hiding is URL-gated CSS and survives injects on its own; re-apply for a
+  // uniform refresh contract every content feature honors.
+  on('region:injected', applyGamepageSettings);
   watchUrlChanges();
 }
