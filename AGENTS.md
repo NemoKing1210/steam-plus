@@ -64,6 +64,10 @@ steam-plus/
 │   │   │   ├── cache.js    # GM-backed price cache (1h TTL)
 │   │   │   ├── ui.js       # Comparison block renderer (states + rows)
 │   │   │   └── index.js    # Mount/teardown, anchors, bus listener
+│   │   ├── links/
+│   │   │   ├── template.js # {name} / {appid} URL templates, game context
+│   │   │   ├── ui.js       # External links chip block renderer
+│   │   │   └── index.js    # Mount/teardown, anchors, bus listener
 │   │   ├── region/
 │   │   │   ├── detect.js   # Region-error detection + store page ids
 │   │   │   ├── request.js  # Anonymous guest fetch (cookies, cc, proxy URL)
@@ -80,6 +84,7 @@ steam-plus/
 │   │           ├── translation.js   # Enabled, provider, trigger, display, scopes
 │   │           ├── gamepage.js      # Master switch + per-block hide grid
 │   │           ├── prices.js        # Regions, position, sort, display toggles
+│   │           ├── links.js         # External links list editor (templates, icons)
 │   │           └── region.js        # Mode, country, banner, proxy gateway
 │   ├── styles/
 │   │   ├── tokens.css      # :root design tokens (sp- palette — DESIGN.md)
@@ -107,7 +112,7 @@ Owns the single page-level `MutationObserver` and the debounced scan loop:
 
 - `init()`: `configureLocale(getSettings().language)` → `pagehide` cache
   flush hooks (once) → `region:rewrote` subscription (once) →
-  `bootDocument()`: all five feature inits (their one-shot bus/window
+  `bootDocument()`: all six feature inits (their one-shot bus/window
   subscriptions are once-guarded, the DOM-applying part always re-runs) →
   initial `scheduleScan()` → scan-observer attach (previous observer
   disconnected first).
@@ -173,6 +178,8 @@ Minimal pub/sub: `on(event, fn)` (returns an unsubscribe fn), `off`,
   hiding stylesheet (`applyGamepageSettings`).
 - `settings:prices` — emitted by the panel footer Save as well. The prices
   feature listens and remounts its comparison block (`applyPricesSettings`).
+- `settings:links` — emitted by the panel footer Save as well. The links
+  feature listens and remounts its chip block (`applyLinksSettings`).
 - `settings:region` — emitted by the panel footer Save as well. The region
   feature listens and re-evaluates the current page (`applyRegionSettings`).
 - `region:rewrote` — emitted by `bypassRegionBlock()` after replacing the
@@ -371,6 +378,18 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   hides body + hint), the `collapsed` setting starts it collapsed; remounts
   on `settings:prices` and store navigation; hides itself for free games.
 
+### `src/features/links/` — external links on store game pages
+
+- `template.js`: `parseAppId()`, `getGameContext()` (appid from the URL,
+  title from `#appHubAppName`), `resolveLinkUrl(template, context)`
+  (browser-style `{name}` / `%s` / `{searchTerms}` → encoded title,
+  `{appid}` → numeric id; non-http(s) → null), `isValidLinkTemplate()`.
+- `ui.js` / `index.js`: `.sp-links` chip block mounted before the buy
+  options, in the sidebar, or below the description (same anchors as
+  prices, with fallbacks); unresolvable templates never render a chip;
+  remounts on `settings:links`, store navigation and `region:injected`.
+  Favicon per link with a letter fallback (all excluded from scans).
+
 ### `src/features/region/` — region-blocked store pages via guest fetch
 
 - `detect.js`: `REGION_PATTERNS` (multilingual “unavailable in your region”
@@ -391,6 +410,7 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   `settings:region` and store navigation; auto mode bypasses at once,
 - `bypass.js`: guest fetch → parse → validate → transplant into the live document, full rewrite fallback.
 - `transplant.js`: swaps guest content into the live page so the logged-in header, styles and scripts survive — responsive-shell children first, error-container fallback; syncs guest body classes, missing page stylesheets and script bundles (bounded wait) before replaying guest inline inits (reviews, sysreq tabs, tags, catalog data) except session/store/header scripts; throws to the rewrite fallback on structural mismatch.
+- `queue.js`: after a signed-in transplant, rebuilds the guest “Sign in” queue block with logged-in wishlist/follow/ignore controls in Steam-native markup — session parsed from live inline scripts (sandbox-safe), wishlist/ignored state from `dynamicstore/userdata`, actions POST through the live session; note chip and categorize island omitted (need store React hydration).
   (from `bypass.js`); `main.js` boots features into the fresh document and
   emits `region:injected` so translation/prices/gamepage refresh on it.
   Guest pages stored by the removed cache are wiped once via `GM_deleteValue`.
@@ -495,6 +515,10 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `prices.showConverted` | `true` | Show the converted price (`≈ …`) next to Steam's formatted price |
 | `prices.collapsed` | `false` | Start with the comparison block collapsed; the header chevron expands it |
 | `prices.fxTtl` | `86400000` (24h) | Exchange rates cache lifetime: 1h / 6h / 24h / 7d; the Conversion section also shows the cached-rates status and a clear-cache button |
+| `links.enabled` | `true` | Master switch for the external links block |
+| `links.position` | `'purchase'` | Block placement: `'purchase'` (above buy options), `'sidebar'`, `'description'` |
+| `links.openInNewTab` | `true` | Open links in a new tab (`noopener`) |
+| `links.items` | 3 defaults | User links (`id`, `name`, `url` template, `icon`, `enabled`); empty names/URLs are dropped, max 30 |
 | `region.enabled` | `true` | Master switch for reloading region-blocked store pages |
 | `region.mode` | `'auto'` | `'auto'` replaces the error page at once; `'manual'` shows an offer button first |
 | `region.countryCode` | `''` | Optional two-letter store country (`cc`) for guest requests; empty keeps your country |

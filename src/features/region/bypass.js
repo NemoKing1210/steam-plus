@@ -13,6 +13,7 @@ import {
   showRegionStatus,
 } from './inject.js';
 import { transplantGuestContent } from './transplant.js';
+import { restoreQueueActions } from './queue.js';
 
 let running = false;
 
@@ -71,6 +72,7 @@ export async function bypassRegionBlock() {
     try {
       await transplantGuestContent(doc, remoteGame);
       transplanted = true;
+      if (signedIn) restoreQueueActions();
     } catch (error) {
       logInfo('region', 'transplant failed, falling back to rewrite', {
         error: String(error?.message || error),

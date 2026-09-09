@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- External links on game pages: a new Links settings tab with user-defined quick links to other stores and databases (SteamDB, ProtonDB and HowLongToBeat by default) — browser-style URL templates with `{name}` / `{appid}` placeholders, custom favicons with a letter fallback, per-link switches, reorder controls, block position and open-in-new-tab toggles, labelled in all 10 UI locales
 - Game page hiding gains two blocks: the sale-event banner under the game title (“This game is part of a sale event”) and the edition/bundle description blocks (e.g. Digital Deluxe Edition contents) above About This Game — both opt-in, labelled in all 10 UI locales
-- Regional prices block is collapsible: a chevron toggle in the block header hides the table to save space, and a new “Start collapsed” switch in Prices → Display renders it collapsed by default
+- Region-bypassed game pages restore the logged-in queue actions when you are signed in: the anonymous “Sign in to add this item…” prompt is replaced with working Add to wishlist / Follow / Ignore controls in Steam’s native markup — wishlist and ignore states resolve from your account data, actions post through your live session with error toasts, labelled in all 10 UI locales
 
 ### Fixed
 

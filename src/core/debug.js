@@ -43,6 +43,8 @@ export const Codes = {
   REGION_FAILED: 'SP-1413',
   /** Guest content transplant failed (rewrite fallback takes over). */
   TRANSPLANT: 'SP-1414',
+  /** Queue action (wishlist/follow/ignore) on a restored page failed. */
+  REGION_QUEUE: 'SP-1415',
 };
 
 const BADGE_STYLE =

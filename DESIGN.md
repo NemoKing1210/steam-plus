@@ -268,6 +268,19 @@ stays hidden unless rates actually feed something visible.
 
 A ghost chevron in the header collapses the block to save space (`is-collapsed` hides body + hint, chevron rotates); `prices.collapsed` starts it collapsed.
 
+### External links (`.sp-links`)
+Sunken info panel like regional prices (same wash, black border, inner
+highlight) with an uppercase accent header and a wrapping row of chips
+(`.sp-links__chip`): dark wash, black border, inner highlight, 16px
+favicon with a letter fallback (`.sp-links__letter`) when no icon is set
+or it fails to load; hover swaps the border to accent and the text to
+white. Chips open in a new tab with `noopener` when `links.openInNewTab`
+is on. The editor (`.sp-link-card`) reuses section-card treatment, text
+inputs (`.sp-input`, `--ghost` up/down/remove buttons, per-card enable
+switch) and a live preview line showing the resolved URL; invalid
+templates get `.is-invalid` (danger ring) and never render a chip.
+A ghost Open button per card tests the resolved link.
+
 ### Translation UI (`.sp-translate-btn`, `.sp-translation`)
 Inline per-block control: icon + label in translucent accent fill
 (`rgba(103,193,245,.2)`) with a 1px `--sp-accent` border and accent text;

@@ -142,6 +142,7 @@ function persistPanelForm() {
     translation: draft.translation,
     gamepage: draft.gamepage,
     prices: draft.prices,
+    links: draft.links,
     region: draft.region,
     toasts: draft.toasts,
   });
@@ -150,6 +151,7 @@ function persistPanelForm() {
   emit('settings:translation');
   emit('settings:gamepage');
   emit('settings:prices');
+  emit('settings:links');
   emit('settings:region');
   if (draft.translation.targetLanguage !== previousTarget) {
     clearTranslationCache();

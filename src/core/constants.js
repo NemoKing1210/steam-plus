@@ -131,6 +131,40 @@ const DEFAULT_REGION = {
   showBanner: false,
 };
 
+/** External links: user-defined quick links to other stores and databases on game pages. */
+const DEFAULT_LINKS = {
+  /** Master switch for the external links block. */
+  enabled: true,
+  /** Block placement: 'purchase' (above buy options), 'sidebar', 'description'. */
+  position: 'purchase',
+  /** Open links in a new tab. */
+  openInNewTab: true,
+  /** User links: { id, name, url (template with {name} / {appid}), icon, enabled }. */
+  items: [
+    {
+      id: 'steamdb',
+      name: 'SteamDB',
+      url: 'https://steamdb.info/app/{appid}/',
+      icon: 'https://steamdb.info/favicon.ico',
+      enabled: true,
+    },
+    {
+      id: 'protondb',
+      name: 'ProtonDB',
+      url: 'https://www.protondb.com/apps/{appid}',
+      icon: 'https://www.protondb.com/favicon.ico',
+      enabled: true,
+    },
+    {
+      id: 'hltb',
+      name: 'HowLongToBeat',
+      url: 'https://howlongtobeat.com/?q={name}',
+      icon: 'https://howlongtobeat.com/favicon.ico',
+      enabled: true,
+    },
+  ],
+};
+
 export const DEFAULT_SETTINGS = {
   /** UI language: 'auto' or one of SUPPORTED_LOCALES. */
   language: 'auto',
@@ -139,6 +173,8 @@ export const DEFAULT_SETTINGS = {
   gamepage: DEFAULT_GAMEPAGE,
   /** Regional price comparison on store game pages. */
   prices: DEFAULT_PRICES,
+  /** External links to other stores and databases on game pages. */
+  links: DEFAULT_LINKS,
   /** Region bypass for store pages blocked with “unavailable in your region”. */
   region: DEFAULT_REGION,
   /** Toast notifications: master switch, screen corner, auto-hide ms (0 = sticky). */

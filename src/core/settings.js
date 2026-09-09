@@ -72,6 +72,49 @@ function normalizeGamepage(raw, fallback) {
 const PRICE_POSITIONS = ['purchase', 'sidebar', 'description'];
 const PRICE_SORTS = ['custom', 'priceAsc', 'discountDesc'];
 const FX_TTLS = [3600000, 21600000, 86400000, 604800000];
+export const LINK_POSITIONS = ['purchase', 'sidebar', 'description'];
+export const MAX_LINKS = 30;
+export const MAX_LINK_FIELD = 500;
+
+export function makeLinkId() {
+  try {
+    if (typeof crypto?.randomUUID === 'function') return crypto.randomUUID();
+  } catch {
+    /* non-secure contexts lack randomUUID */
+  }
+  return `link-${Date.now().toString(36)}-${Math.floor(Math.random() * 0xffff).toString(16)}`;
+}
+
+function normalizeLinkItem(raw) {
+  const text = (value) => (typeof value === 'string' ? value.trim().slice(0, MAX_LINK_FIELD) : '');
+  const id = typeof raw?.id === 'string' && raw.id ? raw.id.slice(0, 64) : makeLinkId();
+  return {
+    id,
+    name: text(raw?.name).slice(0, 60),
+    url: text(raw?.url),
+    icon: text(raw?.icon),
+    enabled: raw?.enabled !== false,
+  };
+}
+
+function normalizeLinks(raw, fallback) {
+  const items = Array.isArray(raw?.items) ? raw.items : fallback.items;
+  const seen = new Set();
+  const normalized = [];
+  for (const entry of items.slice(0, MAX_LINKS)) {
+    const item = normalizeLinkItem(entry);
+    if (!item.name || !item.url) continue;
+    if (seen.has(item.id)) item.id = makeLinkId();
+    seen.add(item.id);
+    normalized.push(item);
+  }
+  return {
+    enabled: raw?.enabled !== false,
+    position: LINK_POSITIONS.includes(raw?.position) ? raw.position : fallback.position,
+    openInNewTab: raw?.openInNewTab !== false,
+    items: normalized,
+  };
+}
 const REGION_MODES = ['auto', 'manual'];
 const REGION_PROXY_MODES = ['gateway', 'path', 'query'];
 
@@ -151,6 +194,7 @@ export function loadSettings() {
     translation: normalizeTranslation(raw.translation, fallback.translation),
     gamepage: normalizeGamepage(raw.gamepage, fallback.gamepage),
     prices: normalizePrices(raw.prices, fallback.prices),
+    links: normalizeLinks(raw.links, fallback.links),
     region: normalizeRegion(raw.region, fallback.region),
     toasts: normalizeToasts(raw.toasts, fallback.toasts),
   };
@@ -172,6 +216,9 @@ export function getGamepageSettings() {
 }
 export function getPricesSettings() {
   return settings.prices;
+}
+export function getLinksSettings() {
+  return settings.links;
 }
 
 export function getRegionSettings() {
@@ -206,6 +253,15 @@ export function saveSettings(patch) {
       prices: normalizePrices(
         { ...settings.prices, ...patch.prices },
         getDefaults().prices,
+      ),
+    };
+  }
+  if (patch.links) {
+    settings = {
+      ...settings,
+      links: normalizeLinks(
+        { ...settings.links, ...patch.links },
+        getDefaults().links,
       ),
     };
   }
