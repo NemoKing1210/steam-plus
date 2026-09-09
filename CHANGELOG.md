@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-09-09
+
+### Fixed
+
+- “Events & announcements” game-page block hid only the legacy markup: the new store React block (`data-featuretarget="events-row"` / `.early_access_announcements`) stayed visible — both selectors are now covered, so the toggle hides the whole block including its header
+
+[0.17.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.17.1
+
+## [0.17.0] - 2026-09-09
+
 ### Added
 
 - External links on game pages: a new Links settings tab with user-defined quick links to other stores and databases (SteamDB, ProtonDB and HowLongToBeat by default) — browser-style URL templates with `{name}` / `{appid}` placeholders, custom favicons with a letter fallback, per-link switches, reorder controls, block position and open-in-new-tab toggles, labelled in all 10 UI locales
@@ -16,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Collapse chevron in the regional prices header was too small to read — enlarged to match the refresh button
+
+[0.17.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.17.0
 
 ## [0.16.2] - 2026-09-09
 

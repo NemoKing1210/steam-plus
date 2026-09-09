@@ -66,6 +66,8 @@ export const GAMEPAGE_BLOCKS = [
       '.announcement_section',
       '#events_row',
       '.event_section',
+      '[data-featuretarget="events-row"]',
+      '.early_access_announcements',
     ],
   },
   {
