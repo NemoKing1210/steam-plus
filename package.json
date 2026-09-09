@@ -1,6 +1,6 @@
 {
   "name": "steam-plus",
-  "version": "0.14.1",
+  "version": "0.16.2",
   "private": true,
   "type": "module",
   "description": "Userscript that improves Steam functionality",

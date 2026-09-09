@@ -87,6 +87,8 @@ export default {
   'block.events': 'Events & announcements',
   'block.details': 'Details & sidebar info',
   'block.recommendations': 'Franchise & recommendations',
+  'block.sale': 'Sale event banner',
+  'block.edition': 'Edition & bundle contents',
 
   'prices.title': 'Regional prices',
   'prices.desc': 'Compare the game price across Steam store regions, right on the game page.',
@@ -128,6 +130,8 @@ export default {
   'prices.showSavings': 'Savings vs your price',
   'prices.highlightCheapest': 'Highlight cheapest',
   'prices.showHomeRow': 'Your price row',
+  'prices.collapsed': 'Start collapsed',
+  'prices.collapsedDesc': 'Collapse the comparison block by default to save space; expand it with the header toggle.',
   'prices.colRegion': 'Region',
   'prices.colPrice': 'Price',
   'prices.colDiscount': 'Discount',
@@ -141,6 +145,8 @@ export default {
   'prices.noRegions': 'Select at least one region in settings',
   'prices.updated': 'Updated {time}',
   'prices.refresh': 'Refresh prices',
+  'prices.collapse': 'Collapse block',
+  'prices.expand': 'Expand block',
   'prices.fxHint': 'Exchange rates: {provider} ({date}).',
 
   'region.title': 'Region bypass',

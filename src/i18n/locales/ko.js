@@ -87,6 +87,8 @@ export default {
   'block.events': '이벤트 & 공지',
   'block.details': '세부 정보 & 사이드바',
   'block.recommendations': '프랜차이즈 & 추천',
+  'block.sale': '세일 이벤트 배너',
+  'block.edition': '에디션 & 번들 구성',
 
   'prices.title': '지역별 가격',
   'prices.desc': '게임 페이지에서 Steam 지역별 게임 가격을 비교하세요.',
@@ -128,6 +130,8 @@ export default {
   'prices.showSavings': '내 가격 대비 절약',
   'prices.highlightCheapest': '최저가 강조',
   'prices.showHomeRow': '내 가격 행',
+  'prices.collapsed': '기본적으로 접기',
+  'prices.collapsedDesc': '비교 블록을 접힌 상태로 시작해 공간을 절약하세요. 헤더 버튼으로 펼칠 수 있습니다.',
   'prices.colRegion': '지역',
   'prices.colPrice': '가격',
   'prices.colDiscount': '할인',
@@ -141,6 +145,8 @@ export default {
   'prices.noRegions': '설정에서 지역을 하나 이상 선택하세요',
   'prices.updated': '{time} 업데이트',
   'prices.refresh': '가격 새로고침',
+  'prices.collapse': '블록 접기',
+  'prices.expand': '블록 펼치기',
   'prices.fxHint': '환율: {provider} ({date}).',
 
   'region.title': '지역 차단 우회',

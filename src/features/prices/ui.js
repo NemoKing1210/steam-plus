@@ -22,7 +22,13 @@ export function createPricesRoot() {
   refresh.dataset.spPricesRefresh = '';
   refresh.title = t('prices.refresh');
   refresh.setAttribute('aria-label', t('prices.refresh'));
-  head.append(updated, refresh);
+  const toggle = el('button', 'sp-prices__toggle', '▾');
+  toggle.type = 'button';
+  toggle.dataset.spPricesToggle = '';
+  toggle.setAttribute('aria-expanded', 'true');
+  toggle.title = t('prices.collapse');
+  toggle.setAttribute('aria-label', t('prices.collapse'));
+  head.append(updated, refresh, toggle);
   root.appendChild(head);
 
   const hint = el('p', 'sp-prices__hint', '');
@@ -193,6 +199,15 @@ function actionButton(label, onClick, primary) {
   button.addEventListener('click', onClick);
   return button;
 }
+export function setPricesCollapsed(root, collapsed) {
+  root.classList.toggle('is-collapsed', collapsed);
+  const toggle = root.querySelector('[data-sp-prices-toggle]');
+  if (!toggle) return;
+  toggle.setAttribute('aria-expanded', String(!collapsed));
+  const label = t(collapsed ? 'prices.expand' : 'prices.collapse');
+  toggle.title = label;
+  toggle.setAttribute('aria-label', label);
+}
 
 /**
  * Paint the prices block. `view` carries the load status, normalized rows
@@ -205,10 +220,13 @@ export function paintPrices(root, view, settings, handlers) {
   const updated = root.querySelector('[data-sp-prices-updated]');
   const hint = root.querySelector('[data-sp-prices-hint]');
   const refresh = root.querySelector('[data-sp-prices-refresh]');
-  if (!body || !hint) return;
+  const toggle = root.querySelector('[data-sp-prices-toggle]');
+  if (!body || !hint || !refresh || !toggle) return;
 
   refresh.onclick = () => handlers.onRefresh();
   refresh.hidden = view.status !== 'ready';
+  toggle.onclick = () => setPricesCollapsed(root, !root.classList.contains('is-collapsed'));
+  setPricesCollapsed(root, root.classList.contains('is-collapsed'));
   body.replaceChildren();
 
   hint.textContent = '';

@@ -265,6 +265,9 @@ border plus the ON `.sp-pill`; the visitor's own price row gets a faint
 accent wash. Loading uses the ring spinner; errors and the manual-load
 button reuse `.sp-button` tones. The rates source line (`prices.fxHint`)
 stays hidden unless rates actually feed something visible.
+
+A ghost chevron in the header collapses the block to save space (`is-collapsed` hides body + hint, chevron rotates); `prices.collapsed` starts it collapsed.
+
 ### Translation UI (`.sp-translate-btn`, `.sp-translation`)
 Inline per-block control: icon + label in translucent accent fill
 (`rgba(103,193,245,.2)`) with a 1px `--sp-accent` border and accent text;

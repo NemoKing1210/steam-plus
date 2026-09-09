@@ -169,6 +169,16 @@ export const pricesTab = {
     pane.appendChild(regionsSection);
 
     const displaySection = createSection({ icon: 'sliders', title: t('prices.display') });
+    displaySection.appendChild(
+      createSwitchRow({
+        checked: pr.collapsed === true,
+        label: t('prices.collapsed'),
+        onChange: (checked) => {
+          pr.collapsed = checked;
+        },
+      }),
+    );
+    displaySection.appendChild(createHint(t('prices.collapsedDesc')));
     const toggles = [
       ['showOriginal', 'prices.showOriginal'],
       ['showDiscount', 'prices.showDiscount'],

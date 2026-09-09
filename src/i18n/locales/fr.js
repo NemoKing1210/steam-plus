@@ -87,6 +87,8 @@ export default {
   'block.events': 'Événements & annonces',
   'block.details': 'Détails & panneau latéral',
   'block.recommendations': 'Franchise & recommandations',
+  'block.sale': 'Bannière d’événement promo',
+  'block.edition': 'Contenu des éditions & packs',
 
   'prices.title': 'Prix régionaux',
   'prices.desc': 'Compare le prix du jeu entre les régions Steam, directement sur la page du jeu.',
@@ -128,6 +130,8 @@ export default {
   'prices.showSavings': 'Économies par rapport à ton prix',
   'prices.highlightCheapest': 'Surligner le moins cher',
   'prices.showHomeRow': 'Ligne de ton prix',
+  'prices.collapsed': 'Commencer réduit',
+  'prices.collapsedDesc': 'Le bloc comparatif démarre réduit pour gagner de la place ; déplie-le via le bouton d’en-tête.',
   'prices.colRegion': 'Région',
   'prices.colPrice': 'Prix',
   'prices.colDiscount': 'Remise',
@@ -141,6 +145,8 @@ export default {
   'prices.noRegions': 'Sélectionne au moins une région dans les réglages',
   'prices.updated': 'Mis à jour {time}',
   'prices.refresh': 'Actualiser les prix',
+  'prices.collapse': 'Réduire le bloc',
+  'prices.expand': 'Déplier le bloc',
   'prices.fxHint': 'Taux de change : {provider} ({date}).',
 
   'region.title': 'Contournement régional',

@@ -89,6 +89,22 @@ export const GAMEPAGE_BLOCKS = [
       '.franchise_notice',
     ],
   },
+  {
+    id: 'sale',
+    labelKey: 'block.sale',
+    selectors: ['.saleEventBannerLink'],
+  },
+  // Edition/package descriptions reuse .game_area_description without an id
+  // (the main text carries #game_area_description): hide the collapsible
+  // container so no empty frame or READ MORE fade remains.
+  {
+    id: 'edition',
+    labelKey: 'block.edition',
+    selectors: [
+      '.game_page_autocollapse_ctn:has(.game_area_description:not(#game_area_description):not(#game_area_content_descriptors):not(#game_area_legal))',
+      '.game_page_autocollapse:has(> .game_area_description:not(#game_area_description):not(#game_area_content_descriptors):not(#game_area_legal))',
+    ],
+  },
 ];
 
 export function getBlockIds() {

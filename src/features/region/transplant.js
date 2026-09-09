@@ -25,6 +25,11 @@ function assetKey(url) {
   }
 }
 
+function syncDocumentTitle(guestDoc) {
+  const title = guestDoc.title?.trim();
+  if (title) document.title = title;
+}
+
 function syncDocumentClasses(guestDoc) {
   for (const tag of ['documentElement', 'body']) {
     const from = guestDoc[tag];
@@ -168,6 +173,7 @@ function swapErrorContainer(guestRoot) {
 }
 
 export async function transplantGuestContent(guestDoc, guestRoot) {
+  syncDocumentTitle(guestDoc);
   syncDocumentClasses(guestDoc);
   const styles = syncHeadStyles(guestDoc);
   const scripts = collectGuestScripts(guestDoc);

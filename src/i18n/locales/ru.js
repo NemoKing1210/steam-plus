@@ -87,6 +87,8 @@ export default {
   'block.events': 'События и анонсы',
   'block.details': 'Детали и боковая панель',
   'block.recommendations': 'Франшиза и рекомендации',
+  'block.sale': 'Баннер события распродажи',
+  'block.edition': 'Состав изданий и комплектов',
 
   'prices.title': 'Региональные цены',
   'prices.desc': 'Сравнивайте цену игры в разных регионах Steam прямо на странице игры.',
@@ -128,6 +130,8 @@ export default {
   'prices.showSavings': 'Выгода относительно вашей цены',
   'prices.highlightCheapest': 'Выделять дешевле всего',
   'prices.showHomeRow': 'Строка вашей цены',
+  'prices.collapsed': 'Сворачивать по умолчанию',
+  'prices.collapsedDesc': 'Блок сравнения свёрнут по умолчанию, чтобы занимать меньше места; разворачивается кнопкой в заголовке.',
   'prices.colRegion': 'Регион',
   'prices.colPrice': 'Цена',
   'prices.colDiscount': 'Скидка',
@@ -141,6 +145,8 @@ export default {
   'prices.noRegions': 'Выберите хотя бы один регион в настройках',
   'prices.updated': 'Обновлено в {time}',
   'prices.refresh': 'Обновить цены',
+  'prices.collapse': 'Свернуть блок',
+  'prices.expand': 'Развернуть блок',
   'prices.fxHint': 'Курсы валют: {provider} ({date}).',
 
   'region.title': 'Обход блокировки',

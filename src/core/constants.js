@@ -72,6 +72,8 @@ const DEFAULT_GAMEPAGE = {
     events: false,
     details: false,
     recommendations: false,
+    sale: false,
+    edition: false,
   },
 };
 
@@ -101,6 +103,8 @@ const DEFAULT_PRICES = {
   convertTo: 'auto',
   /** Show the converted price next to Steam's own formatted price. */
   showConverted: true,
+  /** Start with the comparison block collapsed to save space. */
+  collapsed: false,
   /** Exchange rates cache lifetime, ms (1h / 6h / 24h / 7d). */
   fxTtl: FX_RATES_TTL_MS,
 };

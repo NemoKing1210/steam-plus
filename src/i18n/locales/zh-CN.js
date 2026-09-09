@@ -87,6 +87,8 @@ export default {
   'block.events': '活动与公告',
   'block.details': '详情与侧栏信息',
   'block.recommendations': '系列与推荐',
+  'block.sale': '促销活动横幅',
+  'block.edition': '版本与捆绑包内容',
 
   'prices.title': '区域价格',
   'prices.desc': '直接在游戏页面比较 Steam 各区域的游戏价格。',
@@ -128,6 +130,8 @@ export default {
   'prices.showSavings': '相对你的价格节省',
   'prices.highlightCheapest': '高亮最低价',
   'prices.showHomeRow': '你的价格行',
+  'prices.collapsed': '默认折叠',
+  'prices.collapsedDesc': '对比版块默认折叠以节省空间，点击标题按钮可展开。',
   'prices.colRegion': '区域',
   'prices.colPrice': '价格',
   'prices.colDiscount': '折扣',
@@ -141,6 +145,8 @@ export default {
   'prices.noRegions': '请在设置中至少选择一个区域',
   'prices.updated': '更新于 {time}',
   'prices.refresh': '刷新价格',
+  'prices.collapse': '折叠版块',
+  'prices.expand': '展开版块',
   'prices.fxHint': '汇率：{provider}（{date}）。',
 
   'region.title': '区域限制绕过',

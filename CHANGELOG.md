@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Game page hiding gains two blocks: the sale-event banner under the game title (“This game is part of a sale event”) and the edition/bundle description blocks (e.g. Digital Deluxe Edition contents) above About This Game — both opt-in, labelled in all 10 UI locales
+- Regional prices block is collapsible: a chevron toggle in the block header hides the table to save space, and a new “Start collapsed” switch in Prices → Display renders it collapsed by default
+
+### Fixed
+
+- Collapse chevron in the regional prices header was too small to read — enlarged to match the refresh button
+
+## [0.16.2] - 2026-09-09
+
+### Fixed
+
+- Region-bypassed pages kept the error document title (“Site Error”): the transplant now syncs `document.title` from the guest page
+
+[0.16.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.16.2
+
 ## [0.14.1] - 2026-09-09
 
 ### Fixed

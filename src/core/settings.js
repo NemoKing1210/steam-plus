@@ -116,6 +116,7 @@ function normalizePrices(raw, fallback) {
     showHomeRow: raw?.showHomeRow !== false,
     convertTo: normalizeConvertTo(raw?.convertTo, fallback.convertTo),
     showConverted: raw?.showConverted !== false,
+    collapsed: raw?.collapsed === true,
     fxTtl: FX_TTLS.includes(Number(raw?.fxTtl)) ? Number(raw.fxTtl) : fallback.fxTtl,
   };
 }

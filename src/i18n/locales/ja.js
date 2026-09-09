@@ -87,6 +87,8 @@ export default {
   'block.events': 'イベントとお知らせ',
   'block.details': '詳細とサイドバー情報',
   'block.recommendations': 'フランチャイズとおすすめ',
+  'block.sale': 'セールイベントバナー',
+  'block.edition': 'エディション・バンドル内容',
 
   'prices.title': '地域別価格',
   'prices.desc': 'ゲームページ上でSteam各地域の価格を比較。',
@@ -128,6 +130,8 @@ export default {
   'prices.showSavings': 'あなたの価格との差',
   'prices.highlightCheapest': '最安値をハイライト',
   'prices.showHomeRow': 'あなたの価格行',
+  'prices.collapsed': '初期状態で折りたたむ',
+  'prices.collapsedDesc': '比較ブロックを折りたたんだ状態で表示して省スペース化。ヘッダーのボタンで展開。',
   'prices.colRegion': '地域',
   'prices.colPrice': '価格',
   'prices.colDiscount': '割引',
@@ -141,6 +145,8 @@ export default {
   'prices.noRegions': '設定で地域を1つ以上選択してください',
   'prices.updated': '更新 {time}',
   'prices.refresh': '価格を更新',
+  'prices.collapse': 'ブロックを折りたたむ',
+  'prices.expand': 'ブロックを展開する',
   'prices.fxHint': '為替レート: {provider}（{date}）。',
 
   'region.title': 'リージョンバイパス',

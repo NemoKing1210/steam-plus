@@ -337,10 +337,11 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
 
 ### `src/features/gamepage/` — hideable store game-page blocks
 
-- `blocks.js`: `GAMEPAGE_BLOCKS` registry (10 blocks collected from a live
+- `blocks.js`: `GAMEPAGE_BLOCKS` registry (12 blocks collected from a live
   `/app/<id>` page: media, purchase, description, DLC, system requirements,
-  reviews, curators, events, details, recommendations), each with the
-  container selectors that hide the block header included;
+  reviews, curators, events, details, recommendations, sale banner, edition
+  descriptions), each with the container selectors that hide the block header
+  included;
   `isGamePageUrl()` gates `/app/<id>` + `/agecheck/app/<id>`;
   `buildGamepageCss(hidden)` emits the `display: none !important` rules.
 - `index.js`: `applyGamepageSettings()` keeps a single `#sp-gamepage-style`
@@ -366,8 +367,9 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
 - `ui.js` / `index.js`: `.sp-prices` table mounted before the buy options,
   in the sidebar, or below the description (with fallbacks); headers sort
   in-block with direction toggle (settings row order is the default, home
-  row stays pinned); remounts on `settings:prices` and store navigation;
-  hides itself for free games.
+  row stays pinned); header chevron collapses the block (`is-collapsed`
+  hides body + hint), the `collapsed` setting starts it collapsed; remounts
+  on `settings:prices` and store navigation; hides itself for free games.
 
 ### `src/features/region/` — region-blocked store pages via guest fetch
 
@@ -482,7 +484,7 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `translation.showCached` | `true` | Render cached translations instantly, no button press |
 | `translation.scopes.*` | all `true` | Per-target switches keyed by target id |
 | `gamepage.enabled` | `true` | Master switch for hiding blocks on store game pages |
-| `gamepage.hidden.*` | all `false` | Per-block hide flags keyed by block id (`media`, `purchase`, `description`, `dlc`, `sysreq`, `reviews`, `curators`, `events`, `details`, `recommendations`); nothing is hidden by default |
+| `gamepage.hidden.*` | all `false` | Per-block hide flags keyed by block id (`media`, `purchase`, `description`, `dlc`, `sysreq`, `reviews`, `curators`, `events`, `details`, `recommendations`, `sale`, `edition`); nothing is hidden by default |
 | `prices.enabled` | `true` | Master switch for the regional price comparison block |
 | `prices.autoLoad` | `true` | Load prices automatically; off shows a per-page load button |
 | `prices.regions` | 7 defaults | Compared store country codes (`cc`), in display order; unknown codes are ignored |
@@ -491,6 +493,7 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `prices.showOriginal` / `showDiscount` / `showSavings` / `highlightCheapest` / `showHomeRow` | all `true` | Display toggles: original price, discount badge, savings vs own price, cheapest highlight, own-price row |
 | `prices.convertTo` | `'auto'` | Display currency: `'auto'` (own store currency), `'off'`, or an ISO code — every price converts via live rates |
 | `prices.showConverted` | `true` | Show the converted price (`≈ …`) next to Steam's formatted price |
+| `prices.collapsed` | `false` | Start with the comparison block collapsed; the header chevron expands it |
 | `prices.fxTtl` | `86400000` (24h) | Exchange rates cache lifetime: 1h / 6h / 24h / 7d; the Conversion section also shows the cached-rates status and a clear-cache button |
 | `region.enabled` | `true` | Master switch for reloading region-blocked store pages |
 | `region.mode` | `'auto'` | `'auto'` replaces the error page at once; `'manual'` shows an offer button first |

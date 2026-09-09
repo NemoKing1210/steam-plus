@@ -12,7 +12,7 @@ import {
   loadFxRates,
   toUsd,
 } from './fx.js';
-import { createPricesRoot, paintPrices } from './ui.js';
+import { createPricesRoot, paintPrices, setPricesCollapsed } from './ui.js';
 
 const APPID_RE = /\/app\/(\d+)/;
 const ROOT_SELECTOR = '.sp-prices';
@@ -194,6 +194,7 @@ function mount(appid) {
   const settings = getSettings().prices;
   const wanted = settings.regions.filter(isKnownRegion);
   const root = createPricesRoot();
+  setPricesCollapsed(root, settings.collapsed === true);
   if (!placeRoot(root, resolveAnchor(settings.position))) {
     logInfo('prices', 'no anchor for regional prices', { appid });
     return;
