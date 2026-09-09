@@ -140,7 +140,10 @@ export async function ensureSettingsButton() {
 }
 
 /** Watch Steam re-renders: keep one entry, prefer the account dropdown. */
+let headerObserver = null;
+
 export function observeHeader() {
+  headerObserver?.disconnect();
   const observer = new MutationObserver(() => {
     const existing = document.getElementById(BUTTON_ID);
     const menu = getAccountMenuBody();
@@ -153,12 +156,17 @@ export function observeHeader() {
       void ensureSettingsButton();
     }
   });
+  headerObserver = observer;
   observer.observe(document.documentElement, { childList: true, subtree: true });
 }
+
+let settingsSubscribed = false;
 
 export function initSettingsFeature() {
   void ensureSettingsButton();
   observeHeader();
+  if (settingsSubscribed) return;
+  settingsSubscribed = true;
   // Keep the header fallback dot in sync with persisted settings.
   on('settings:translation', updateSettingsButtonState);
   on('settings:gamepage', updateSettingsButtonState);

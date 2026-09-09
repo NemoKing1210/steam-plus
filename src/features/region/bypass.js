@@ -8,12 +8,12 @@ import {
   readRegionCache,
   writeRegionCache,
 } from './cache.js';
-import { isRegionBlockedPage } from './detect.js';
+import { isHostLoggedIn, isRegionBlockedPage } from './detect.js';
 import {
   getContentMount,
   extractStoreRoot,
   hideRegionLoader,
-  injectStoreRoot,
+  rewriteDocumentWithGuest,
   showRegionLoader,
   showRegionStatus,
 } from './inject.js';
@@ -25,7 +25,7 @@ export function isRegionBypassActive() {
 }
 
 export function isRegionInjected() {
-  return !!document.querySelector('.sp-region-injected');
+  return !!document.querySelector('.sp-region-banner');
 }
 
 export async function bypassRegionBlock(options = {}) {
@@ -84,12 +84,12 @@ export async function bypassRegionBlock(options = {}) {
     }
     if (!fromCache) writeRegionCache(targetUrl, html);
     const viaProxy = !!(settings.proxyEnabled && settings.proxyHost.trim());
-    await injectStoreRoot(remoteGame, doc, { fromCache, viaProxy });
+    const signedIn = isHostLoggedIn();
+    rewriteDocumentWithGuest(html);
     hideRegionLoader();
-    // The URL does not change, so content features would never notice the
-    // fresh DOM on their own — notify them explicitly (bus isolates
-    // listener failures, so one broken feature cannot block the rest).
-    emit('region:injected', { url: location.href, fromCache, viaProxy });
+    // The document was replaced: main.js boots features into it on
+    // `region:rewrote`, then emits `region:injected` once they are live.
+    emit('region:rewrote', { url: location.href, fromCache, viaProxy, signedIn });
   } catch (error) {
     const message =
       error?.message && !/^SP-141\d/.test(String(error.message))

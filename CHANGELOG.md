@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.5] - 2026-09-08
+
+### Fixed
+
+- Region bypass media now loads on the first open: the bypass replaces the error document with the guest HTML (`document.open/write/close`) instead of surgically injecting nodes, so Steam scripts boot through the natural parser path — execution order, jQuery ready handlers, and the store React islands (video/screenshot carousel, recommendations) hydrate exactly like a real page load; features re-boot into the fresh document and the notice banner is re-inserted after load
+
+## [0.11.4] - 2026-09-08
+
+### Fixed
+
+- Region bypass left videos and screenshots unrendered on first load: the guest script backfill skipped Steam's `applications/store` bundles, so the React carousel (`gamehighlight-desktopcarousel`) and other islands never hydrated — the store chunks (manifest, libraries, main) now load in document order, and stylesheet/script waits are time-bounded and concurrent so a stalled CDN asset can no longer block page boot
+
 ## [0.11.3] - 2026-09-08
 
 ### Fixed
@@ -172,7 +184,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-09-07
 
 ### Added
-
+[0.11.5]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.5
+[0.11.4]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.4
 - Cache tab in the settings panel: translation-cache storage meter, collapsible stored-translations list with per-entry removal, and a clear-cache action with a status line
 - About tab in the settings panel: product hero with version chip, author card, and repository link
 

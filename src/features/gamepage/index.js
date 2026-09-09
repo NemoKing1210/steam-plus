@@ -36,8 +36,12 @@ function watchUrlChanges() {
   watchStoreNavigation(() => applyGamepageSettings());
 }
 
+let gamepageSubscribed = false;
+
 export function initGamepageFeature() {
   applyGamepageSettings();
+  if (gamepageSubscribed) return;
+  gamepageSubscribed = true;
   on('settings:gamepage', applyGamepageSettings);
   // Hiding is URL-gated CSS and survives injects on its own; re-apply for a
   // uniform refresh contract every content feature honors.

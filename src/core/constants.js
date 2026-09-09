@@ -32,6 +32,8 @@ export const REGION_CACHE_MAX_ENTRIES_CAP = 100;
 export const REGION_CACHE_MINUTES_MAX = 10080;
 /** Anonymous guest request timeout, ms. */
 export const REGION_REQUEST_TIMEOUT_MS = 45000;
+/** Cap for the rewritten guest document to reach window load, ms; boot continues regardless. */
+export const REGION_BOOT_TIMEOUT_MS = 30000;
 /** Debounce for DOM mutation rescans. */
 export const SCAN_DEBOUNCE_MS = 450;
 /** CSS class prefix used by every element we create (excluded from scans). */

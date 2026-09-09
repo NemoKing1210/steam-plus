@@ -221,11 +221,15 @@ export function applyPricesSettings() {
   mount(appid);
 }
 
+let pricesSubscribed = false;
+
 export function initPricesFeature() {
   loadPriceCache();
   applyPricesSettings();
+  if (pricesSubscribed) return;
+  pricesSubscribed = true;
   on('settings:prices', applyPricesSettings);
-  // Region bypass swaps the page body without changing the URL, so the
+  // Region bypass replaces the document without changing the URL, so the
   // navigation watcher never fires — remount into the fresh anchors here.
   on('region:injected', applyPricesSettings);
   watchStoreNavigation(() => applyPricesSettings());

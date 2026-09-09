@@ -68,8 +68,8 @@ steam-plus/
 │   │   │   ├── detect.js   # Region-error detection + store page ids
 │   │   │   ├── request.js  # Anonymous guest fetch (cookies, cc, proxy URL)
 │   │   │   ├── cache.js    # GM-backed guest HTML cache (minutes TTL)
-│   │   │   ├── inject.js   # Error-shell clear + guest layout/asset/banner inject
-│   │   │   ├── bypass.js   # Guest fetch → parse → inject orchestrator
+│   │   │   ├── inject.js   # Document rewrite + banner/offer/status UI
+│   │   │   ├── bypass.js   # Guest fetch → parse → rewrite orchestrator
 │   │   │   └── index.js    # Detection lifecycle, URL watcher, bus listener
 │   │   └── settings/
 │   │       ├── index.js    # Settings entry: account-menu item + header
@@ -106,10 +106,16 @@ steam-plus/
 
 Owns the single page-level `MutationObserver` and the debounced scan loop:
 
-- `init()`: `configureLocale(getSettings().language)` →
-  `initSettingsFeature()` → `initGamepageFeature()` → `initPricesFeature()` →
-  `initRegionFeature()` → `initTranslationEngine()` → `pagehide` cache
-  flush hooks → initial `scheduleScan()` → observer attach.
+- `init()`: `configureLocale(getSettings().language)` → `pagehide` cache
+  flush hooks (once) → `region:rewrote` subscription (once) →
+  `bootDocument()`: all five feature inits (their one-shot bus/window
+  subscriptions are once-guarded, the DOM-applying part always re-runs) →
+  initial `scheduleScan()` → scan-observer attach (previous observer
+  disconnected first).
+- `handleRegionRewrote()`: after a region bypass replaces the document,
+  waits for window load (`waitForBootComplete`, bounded) → strips signed-out
+  chrome → `bootDocument()` → inserts the region banner → emits
+  `region:injected` so content features refresh on the fresh DOM.
 - `runScan()` drains `pendingScanNodes`; the first scan is a full-document
   pass (`hasInitialScan` drops the collected nodes), later scans process only
   added nodes. Nodes belonging to our own UI are skipped via `isOwnUi()`.
@@ -172,10 +178,13 @@ Minimal pub/sub: `on(event, fn)` (returns an unsubscribe fn), `off`,
   feature listens and remounts its comparison block (`applyPricesSettings`).
 - `settings:region` — emitted by the panel footer Save as well. The region
   feature listens and re-evaluates the current page (`applyRegionSettings`).
-- `region:injected` — emitted by `bypassRegionBlock()` after the guest layout
-  lands (the URL never changes, so no watcher would fire). Translation
-  rescans, prices remounts, gamepage re-applies — the uniform refresh
-  contract every content feature honors.
+- `region:rewrote` — emitted by `bypassRegionBlock()` after replacing the
+  error document with guest HTML. `main.js` boots features into it, then
+  emits `region:injected` below.
+- `region:injected` — emitted by `main.js` once features are live on the
+  fresh document (the URL never changes, so no watcher would fire).
+  Translation rescans, prices remounts, gamepage re-applies — the uniform
+  refresh contract every content feature honors.
 
 ### `src/core/debug.js` — diagnostics
 
@@ -372,17 +381,18 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   language, optional `?cc=`), `buildRequestUrl()` / `buildProxyBase()`
   (gateway / path / query modes), age-gate + `Steam_Language` cookies and
   `Accept-Language` headers, `guestFetch()` (`GM_xmlhttpRequest` with
-  `anonymous: true`, Basic auth only for the proxy).
-- `cache.js`: GM-backed guest HTML cache (`sp_region_cache_v1`, minutes TTL,
-  max entries, newest-first prune) with stats/byte helpers for the tab.
-- `inject.js`: error-shell clear, Steam wrapper-preserving guest layout
-  inject, missing app stylesheets/scripts backfill, guest inline-script
-  replay, tag-widget fixup, plus the `.sp-region-*` banner/offer/status/
-  loader UI (all excluded from scans).
+- `inject.js`: `rewriteDocumentWithGuest()` (`document.open/write/close`
+  so Steam boots through the natural parser path — script order, jQuery
+  ready, React islands), `waitForBootComplete()` (bounded window-load wait),
+  `extractStoreRoot()` (guest-content validation), `stripGuestSignedOutChrome()`,
+  plus the `.sp-region-*` banner/offer/status/loader UI (all excluded
+  from scans).
+- `bypass.js`: guest fetch → parse → validate → rewrite orchestrator.
 - `index.js`: `applyRegionSettings()` re-evaluates the current URL on
   `settings:region` and store navigation; auto mode bypasses at once,
-  manual mode shows the offer card first. Success emits `region:injected`
-  (from `bypass.js`) so translation/prices/gamepage refresh on the fresh DOM.
+  manual mode shows the offer card first. Success emits `region:rewrote`
+  (from `bypass.js`); `main.js` boots features into the fresh document and
+  emits `region:injected` so translation/prices/gamepage refresh on it.
 
 ### `src/i18n/`
 

@@ -291,7 +291,11 @@ function pruneAll() {
   for (const target of listTargets()) forEachTargetElement(target, destroyController);
 }
 
+let engineInitialized = false;
+
 export function initTranslationEngine() {
+  if (engineInitialized) return;
+  engineInitialized = true;
   loadMemoryCache();
   on('settings:translation', applyTranslationSettings);
   // Guest regional content arrives without navigation or scan roots —

@@ -18,12 +18,12 @@ function evaluate(url) {
   void bypassRegionBlock();
 }
 
-export function applyRegionSettings() {
-  evaluate(location.href);
-}
+let regionSubscribed = false;
 
 export function initRegionFeature() {
   evaluate(location.href);
+  if (regionSubscribed) return;
+  regionSubscribed = true;
   on('settings:region', () => evaluate(location.href));
   watchStoreNavigation((url) => evaluate(url));
 }
