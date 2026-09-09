@@ -4,31 +4,16 @@ import {
   createButton,
   createField,
   createHint,
-  createNumberInput,
   createSection,
   createSelect,
   createSegmented,
   createSwitchRow,
   createTextInput,
 } from '../controls.js';
-import {
-  clearRegionCache,
-  formatRegionCacheBytes,
-  getRegionCacheStats,
-} from '../../region/cache.js';
 import { bypassRegionBlock, isRegionInjected } from '../../region/bypass.js';
 import { isRegionBlockedPage } from '../../region/detect.js';
 
 const PROXY_MODES = ['gateway', 'path', 'query'];
-
-function cacheStatusLine() {
-  const stats = getRegionCacheStats();
-  if (!stats.count) return t('region.cacheEmpty');
-  return t('region.cacheStatus', {
-    count: stats.count,
-    size: formatRegionCacheBytes(stats.bytes),
-  });
-}
 
 export const regionTab = {
   id: 'region',
@@ -50,6 +35,16 @@ export const regionTab = {
       }),
     );
     mainSection.appendChild(createHint(t('region.enabledDesc')));
+    mainSection.appendChild(
+      createSwitchRow({
+        checked: rg.showBanner === true,
+        label: t('region.showBanner'),
+        onChange: (checked) => {
+          rg.showBanner = checked;
+        },
+      }),
+    );
+    mainSection.appendChild(createHint(t('region.showBannerDesc')));
     mainSection.appendChild(
       createField({
         label: t('region.mode'),
@@ -80,65 +75,16 @@ export const regionTab = {
         }),
       }),
     );
-    pane.appendChild(mainSection);
-
-    const cacheSection = createSection({ icon: 'database', title: t('region.cache') });
-    cacheSection.appendChild(createHint(t('region.cacheDesc')));
-    cacheSection.appendChild(
-      createField({
-        label: t('region.cacheMinutes'),
-        hint: t('region.cacheMinutesDesc'),
-        control: createNumberInput({
-          value: rg.cacheMinutes,
-          min: 0,
-          max: 10080,
-          step: 1,
-          onChange: (value) => {
-            rg.cacheMinutes = value;
-          },
-        }),
-      }),
-    );
-    cacheSection.appendChild(
-      createField({
-        label: t('region.cacheMax'),
-        hint: t('region.cacheMaxDesc'),
-        control: createNumberInput({
-          value: rg.cacheMaxEntries,
-          min: 1,
-          max: 100,
-          step: 1,
-          onChange: (value) => {
-            rg.cacheMaxEntries = value;
-          },
-        }),
-      }),
-    );
-    const status = createHint(cacheStatusLine());
-    cacheSection.appendChild(status);
-    const row = el('div', 'sp-cache-row');
-    row.appendChild(
-      createButton(
-        t('region.cacheClear'),
-        () => {
-          const count = clearRegionCache();
-          status.textContent =
-            count > 0
-              ? t('region.cacheCleared', { count })
-              : t('region.cacheEmpty');
-        },
-        'sp-button--ghost',
-      ),
-    );
     if (isRegionBlockedPage() && !isRegionInjected() && rg.enabled !== false) {
+      const row = el('div', 'sp-cache-row');
       row.appendChild(
         createButton(t('region.reload'), () => {
-          bypassRegionBlock({ forceRefresh: true });
+          bypassRegionBlock();
         }),
       );
+      mainSection.appendChild(row);
     }
-    cacheSection.appendChild(row);
-    pane.appendChild(cacheSection);
+    pane.appendChild(mainSection);
 
     const proxySection = createSection({ icon: 'swap', title: t('region.proxy') });
     proxySection.appendChild(createHint(t('region.proxyDesc')));

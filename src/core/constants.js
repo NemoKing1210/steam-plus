@@ -22,18 +22,12 @@ export const PRICE_CACHE_TTL_MS = 60 * 60 * 1000;
 export const FX_RATES_TTL_MS = 24 * 60 * 60 * 1000;
 /** Max parallel regional price requests. */
 export const MAX_PRICE_REQUESTS = 3;
-/** Guest page cache storage key for the region bypass. */
-export const REGION_CACHE_KEY = 'sp_region_cache_v1';
-/** Default guest page cache size (newest entries kept). */
-export const REGION_CACHE_MAX_ENTRIES = 30;
-/** Upper bound for the guest page cache size setting. */
-export const REGION_CACHE_MAX_ENTRIES_CAP = 100;
-/** Upper bound for the guest page cache lifetime setting, minutes (7 days). */
-export const REGION_CACHE_MINUTES_MAX = 10080;
 /** Anonymous guest request timeout, ms. */
 export const REGION_REQUEST_TIMEOUT_MS = 45000;
 /** Cap for the rewritten guest document to reach window load, ms; boot continues regardless. */
 export const REGION_BOOT_TIMEOUT_MS = 30000;
+/** Cap for loading missing guest bundles before replaying init scripts, ms. */
+export const REGION_ASSET_TIMEOUT_MS = 10000;
 /** Debounce for DOM mutation rescans. */
 export const SCAN_DEBOUNCE_MS = 450;
 /** CSS class prefix used by every element we create (excluded from scans). */
@@ -119,10 +113,6 @@ const DEFAULT_REGION = {
   mode: 'auto',
   /** Optional Steam store country override (`cc`) for guest requests, '' = keep mine. */
   countryCode: '',
-  /** Guest page cache lifetime, minutes (0 disables the cache). */
-  cacheMinutes: 60,
-  /** Max guest pages kept (newest entries win). */
-  cacheMaxEntries: REGION_CACHE_MAX_ENTRIES,
   /** Route the anonymous fetch through an HTTP gateway (IP-based locks). */
   proxyEnabled: false,
   /** Gateway address without scheme (host) plus optional port. */
@@ -133,6 +123,8 @@ const DEFAULT_REGION = {
   proxyPass: '',
   /** How the target URL is appended to host:port: 'gateway' | 'path' | 'query'. */
   proxyMode: 'gateway',
+  /** Show the guest-fetch notice banner on bypassed pages (hidden by default). */
+  showBanner: false,
 };
 
 export const DEFAULT_SETTINGS = {

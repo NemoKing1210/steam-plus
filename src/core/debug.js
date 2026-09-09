@@ -39,10 +39,10 @@ export const Codes = {
   REGION_REQUEST: 'SP-1410',
   /** Region bypass guest response held no usable store content. */
   REGION_RESPONSE: 'SP-1411',
-  /** Region bypass guest page cache read/write failed. */
-  REGION_CACHE: 'SP-1412',
   /** Region bypass run failed (logged once at the outermost point). */
   REGION_FAILED: 'SP-1413',
+  /** Guest content transplant failed (rewrite fallback takes over). */
+  TRANSPLANT: 'SP-1414',
 };
 
 const BADGE_STYLE =

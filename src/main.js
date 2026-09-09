@@ -81,15 +81,17 @@ function bootDocument() {
  * its natural boot, attach our features to the fresh document, then notify
  * content features through the uniform `region:injected` contract.
  */
-async function handleRegionRewrote({ fromCache = false, viaProxy = false, signedIn = false } = {}) {
-  await waitForBootComplete();
-  stripGuestSignedOutChrome(document, { signedIn });
+async function handleRegionRewrote({ viaProxy = false, signedIn = false, transplanted = false } = {}) {
+  if (!transplanted) {
+    await waitForBootComplete();
+    stripGuestSignedOutChrome(document, { signedIn });
+  }
   bootDocument();
-  insertBannerIntoGrid(document, createRegionBanner({ fromCache, viaProxy }));
+  if (getSettings().region.showBanner === true) insertBannerIntoGrid(document, createRegionBanner({ viaProxy }));
   // The URL never changes, so content features would never notice the
   // fresh DOM on their own — notify them explicitly (bus isolates
   // listener failures, so one broken feature cannot block the rest).
-  emit('region:injected', { url: location.href, fromCache, viaProxy });
+  emit('region:injected', { url: location.href, viaProxy });
 }
 
 function init() {

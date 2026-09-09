@@ -80,18 +80,10 @@ function normalizeRegion(raw, fallback) {
   const country = typeof raw?.countryCode === 'string' && /^[A-Za-z]{2}$/.test(raw.countryCode.trim())
     ? raw.countryCode.trim().toUpperCase()
     : '';
-  const cacheMinutes = Number.isFinite(Math.round(Number(raw?.cacheMinutes)))
-    ? Math.min(10080, Math.max(0, Math.round(Number(raw.cacheMinutes))))
-    : fallback.cacheMinutes;
-  const cacheMax = Number.isFinite(Math.round(Number(raw?.cacheMaxEntries)))
-    ? Math.min(100, Math.max(1, Math.round(Number(raw.cacheMaxEntries))))
-    : fallback.cacheMaxEntries;
   return {
     enabled: raw?.enabled !== false,
     mode: REGION_MODES.includes(raw?.mode) ? raw.mode : fallback.mode,
-    countryCode: country,
-    cacheMinutes,
-    cacheMaxEntries: cacheMax,
+    showBanner: raw?.showBanner === true,
     proxyEnabled: raw?.proxyEnabled === true,
     proxyHost: text(raw?.proxyHost, 253).trim(),
     proxyPort: text(raw?.proxyPort, 5).trim(),

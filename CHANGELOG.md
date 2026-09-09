@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-09-09
+
+### Fixed
+
+- Transplanted pages rendered broken: the live error document lacks the game-page stylesheets (`game.css` et al), script bundles (`game.js`, highlight player, reviews, tagging) and body classes (`app`, `game_bg`) — the transplant now syncs missing page CSS, loads missing bundles with a bounded wait, and unions guest body classes before replaying init scripts, so blocks land in their native layout
+
+## [0.14.0] - 2026-09-09
+
+### Changed
+
+- Region bypass no longer replaces the whole document: guest content is transplanted into the live page, so the logged-in site header (account, wallet, notifications), styles and scripts survive — guest inline inits for reviews, sysreq tabs, tags and catalog data replay with session/header scripts filtered out, store React islands hydrate via the running runtime, and the full-document rewrite stays as an automatic fallback when there is nothing to transplant into
+
+## [0.13.1] - 2026-09-09
+
+### Fixed
+
+- Bypassed pages lost all script styles: `document.open/write/close` wiped the one-time `GM_addStyle` stylesheet, so the price comparison block, translate buttons and banner rendered without CSS (overlapping rows, raw boxes, plain buttons) — our `<style>` nodes are now rescued before the rewrite and re-attached to the fresh document
+
+## [0.13.0] - 2026-09-09
+
+### Removed
+
+- Region bypass guest-page cache is gone: every bypass fetches fresh HTML instead of reusing stored pages — the Guest page cache section (lifetime, entry limit, status, clear button) leaves the Region settings tab with its 11 strings in all 10 UI locales, and previously stored guest pages are wiped from userscript storage on first run
+
+## [0.12.0] - 2026-09-09
+
+### Added
+
+- Region bypass notice banner is now hidden by default and opt-in: a new “Show notice banner” switch in the Region settings tab (in all 10 UI locales) controls whether bypassed pages show the guest-fetch notice — disabling it also removes an already-inserted banner on save
+
 ## [0.11.5] - 2026-09-08
 
 ### Fixed
@@ -184,6 +214,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-09-07
 
 ### Added
+[0.14.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.14.1
+[0.14.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.14.0
+[0.13.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.13.1
+[0.13.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.13.0
+[0.12.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.12.0
 [0.11.5]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.5
 [0.11.4]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.11.4
 - Cache tab in the settings panel: translation-cache storage meter, collapsible stored-translations list with per-entry removal, and a clear-cache action with a status line

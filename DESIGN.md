@@ -297,7 +297,7 @@ spinner and `region.loading`). Failures render a centered status card
 Injected content keeps Steam's own wrappers (`.game_page_background` /
 `#tabletGrid`), so the store layout applies untouched; the only addition is
 a sunken notice banner (`.sp-region-banner`) docked at the top of the grid:
-uppercase accent badge, bold white title, muted details line (proxy/cache
+uppercase accent badge, bold white title, muted details line (proxy
 source appended when true) and a ghost Reload action. All four classes stay
 excluded from content scans via `isOwnUi()` and the observer filter.
 

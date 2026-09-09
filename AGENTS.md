@@ -67,7 +67,6 @@ steam-plus/
 │   │   ├── region/
 │   │   │   ├── detect.js   # Region-error detection + store page ids
 │   │   │   ├── request.js  # Anonymous guest fetch (cookies, cc, proxy URL)
-│   │   │   ├── cache.js    # GM-backed guest HTML cache (minutes TTL)
 │   │   │   ├── inject.js   # Document rewrite + banner/offer/status UI
 │   │   │   ├── bypass.js   # Guest fetch → parse → rewrite orchestrator
 │   │   │   └── index.js    # Detection lifecycle, URL watcher, bus listener
@@ -81,7 +80,7 @@ steam-plus/
 │   │           ├── translation.js   # Enabled, provider, trigger, display, scopes
 │   │           ├── gamepage.js      # Master switch + per-block hide grid
 │   │           ├── prices.js        # Regions, position, sort, display toggles
-│   │           └── region.js        # Mode, country, guest cache, proxy gateway
+│   │           └── region.js        # Mode, country, banner, proxy gateway
 │   ├── styles/
 │   │   ├── tokens.css      # :root design tokens (sp- palette — DESIGN.md)
 │   │   └── app.css         # Injected styles, sp- prefix (GM_addStyle via build)
@@ -132,14 +131,12 @@ Single place for magic values. Notable entries:
 
 - `SCRIPT_NAME`, storage keys `SETTINGS_KEY = 'sp_settings_v1'`,
   `TRANSLATION_CACHE_KEY = 'sp_translation_cache_v1'`,
-  `PRICES_CACHE_KEY = 'sp_prices_cache_v1'`,
-  `REGION_CACHE_KEY = 'sp_region_cache_v1'`.
+  `PRICES_CACHE_KEY = 'sp_prices_cache_v1'`.
 - Translation limits: `TRANSLATION_CACHE_TTL_MS` (7 days),
   `TRANSLATION_CACHE_MAX_ENTRIES` (2000, LRU trim),
   `MAX_CONCURRENT_REQUESTS` (3), `MAX_REQUEST_TEXT_LENGTH` (4000 chars,
   hard-split), `SCAN_DEBOUNCE_MS` (450), `CACHE_PERSIST_MS` (1000).
-- Region limits: `REGION_CACHE_MAX_ENTRIES` (30, newest-first prune, cap 100),
-  `REGION_CACHE_MINUTES_MAX` (10080), `REGION_REQUEST_TIMEOUT_MS` (45000).
+- Region limits: `REGION_REQUEST_TIMEOUT_MS` (45000).
 - `DEFAULT_TRANSLATION` and `DEFAULT_SETTINGS` (defaults for `language` and
   the whole `translation` block); `getDefaults()` returns a deep clone (the
   objects are shared constants — never mutate them directly).
@@ -390,9 +387,11 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
 - `bypass.js`: guest fetch → parse → validate → rewrite orchestrator.
 - `index.js`: `applyRegionSettings()` re-evaluates the current URL on
   `settings:region` and store navigation; auto mode bypasses at once,
-  manual mode shows the offer card first. Success emits `region:rewrote`
+- `bypass.js`: guest fetch → parse → validate → transplant into the live document, full rewrite fallback.
+- `transplant.js`: swaps guest content into the live page so the logged-in header, styles and scripts survive — responsive-shell children first, error-container fallback; syncs guest body classes, missing page stylesheets and script bundles (bounded wait) before replaying guest inline inits (reviews, sysreq tabs, tags, catalog data) except session/store/header scripts; throws to the rewrite fallback on structural mismatch.
   (from `bypass.js`); `main.js` boots features into the fresh document and
   emits `region:injected` so translation/prices/gamepage refresh on it.
+  Guest pages stored by the removed cache are wiped once via `GM_deleteValue`.
 
 ### `src/i18n/`
 
@@ -496,8 +495,7 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `region.enabled` | `true` | Master switch for reloading region-blocked store pages |
 | `region.mode` | `'auto'` | `'auto'` replaces the error page at once; `'manual'` shows an offer button first |
 | `region.countryCode` | `''` | Optional two-letter store country (`cc`) for guest requests; empty keeps your country |
-| `region.cacheMinutes` | `60` | Guest page cache lifetime, minutes (`0` disables the cache; Reload always refetches) |
-| `region.cacheMaxEntries` | `30` | Max guest pages kept (newest win, cap 100) |
+| `region.showBanner` | `false` | Show the guest-fetch notice banner on bypassed pages; applies on the next reload |
 | `region.proxyEnabled` / `proxyHost` / `proxyPort` / `proxyUser` / `proxyPass` | `false` / `''` | HTTP gateway for IP-based locks (host + optional port, Basic auth) |
 | `region.proxyMode` | `'gateway'` | URL append style: `'gateway'` (`host:port/https://…`), `'path'`, `'query'` (`?url=…`) |
 | `toasts.enabled` | `true` | Master switch for toast notifications |
