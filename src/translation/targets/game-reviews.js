@@ -1,3 +1,4 @@
+import { isOwnUi } from '../../utils/dom.js';
 import { registerTarget } from './index.js';
 
 /**
@@ -9,7 +10,7 @@ function findActionsRow(element) {
   let node = element.parentElement;
   for (let depth = 0; depth < 4 && node instanceof Element; depth += 1) {
     const row = node.querySelector('div:has(> button + button)');
-    if (row && !row.contains(element)) return row;
+    if (row && !row.contains(element) && !isOwnUi(row)) return row;
     node = node.parentElement;
   }
   return null;

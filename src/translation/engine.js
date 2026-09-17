@@ -11,7 +11,7 @@ import {
   loadMemoryCache,
   setCachedTranslation,
 } from './cache.js';
-import { resolveTargetLanguage } from '../utils/dom.js';
+import { isOwnUi, resolveTargetLanguage } from '../utils/dom.js';
 import { TranslatableNode } from './ui/controller.js';
 
 /** @type {WeakMap<Element, TranslatableNode>} */
@@ -209,9 +209,8 @@ export function scanForTranslatable(root) {
       continue;
     }
     for (const element of elements) {
+      if (isOwnUi(element)) continue;
       if (controllers.has(element)) continue;
-      // Skip elements we created ourselves.
-      if (element.closest('.sp-translation, .sp-translate-btn')) continue;
       const controller = new TranslatableNode(element);
       controller.scopeId = target.id;
       controller.placeButton = target.placeButton ?? null;

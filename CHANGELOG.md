@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.25.1] - 2026-09-17
+
+### Fixed
+
+- Review Translate buttons no longer dock into the Regional prices header: the button-row search skips Steam Plus UI, and the translation scan ignores elements inside our own blocks
+
+[0.25.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.25.1
+
 ## [0.25.0] - 2026-09-15
 
 ### Added
