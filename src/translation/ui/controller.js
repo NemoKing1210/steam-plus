@@ -8,6 +8,30 @@ const ICON_GLOBE =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/></svg>';
 
 /**
+ * Build a translate button without wiring it: per-element controllers bind
+ * their own click handler, the engine reuses this for grouped scope buttons
+ * that drive several controllers at once.
+ */
+export function buildTranslateButton(id) {
+  const button = el('button', 'sp-translate-btn');
+  button.id = `${id}-btn`;
+  button.type = 'button';
+  const icon = el('span', 'sp-translate-btn__icon');
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = ICON_GLOBE;
+  const label = el('span', 'sp-translate-btn__label', t('translate.button'));
+  button.append(icon, label);
+  return { button, label };
+}
+
+/** Toggle the loading spinner on any translate button. */
+export function setButtonLoading(button, loading) {
+  button?.classList.toggle('is-loading', loading);
+  const icon = button?.querySelector('.sp-translate-btn__icon');
+  if (icon) icon.innerHTML = loading ? '<span class="sp-translate-btn__spinner"></span>' : ICON_GLOBE;
+}
+
+/**
  * Controls translation of a single DOM element:
  * injects the translate button, fetches and renders the translation
  * according to the current settings (below / replace).
@@ -35,11 +59,11 @@ export class TranslatableNode {
     this.labelNode = null;
     this.translationBox = null;
     this.settings = null;
-    this.translateFn = null;
-    this.placeButton = null;
     this.visible = false;
     this.attached = false;
     this.destroyed = false;
+    this.grouped = false;
+    this.group = null;
   }
 
   get blockTexts() {
@@ -59,12 +83,12 @@ export class TranslatableNode {
 
     this.button = this.createButton(this.id);
     this.button.classList.add('sp-translate-btn--pending');
-    this.positionButton();
+    if (!this.grouped) this.positionButton();
   }
 
   /** Place the button for the current display mode and target hook. */
   positionButton() {
-    if (!this.button) return;
+    if (!this.button || this.grouped) return;
     this.button.classList.remove(
       'sp-translate-btn--replace',
       'sp-translate-btn--actions',
@@ -90,14 +114,8 @@ export class TranslatableNode {
   }
 
   createButton(id) {
-    const button = el('button', 'sp-translate-btn');
-    button.id = `${id}-btn`;
-    button.type = 'button';
-    const icon = el('span', 'sp-translate-btn__icon');
-    icon.setAttribute('aria-hidden', 'true');
-    icon.innerHTML = ICON_GLOBE;
-    this.labelNode = el('span', 'sp-translate-btn__label', t('translate.button'));
-    button.append(icon, this.labelNode);
+    const { button, label } = buildTranslateButton(id);
+    this.labelNode = label;
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -107,9 +125,7 @@ export class TranslatableNode {
   }
 
   setLoading(loading) {
-    this.button?.classList.toggle('is-loading', loading);
-    const icon = this.button?.querySelector('.sp-translate-btn__icon');
-    if (icon) icon.innerHTML = loading ? '<span class="sp-translate-btn__spinner"></span>' : ICON_GLOBE;
+    setButtonLoading(this.button, loading);
   }
 
   onButtonClick() {
@@ -131,10 +147,20 @@ export class TranslatableNode {
       default:
         break;
     }
+    this.notifyGroup();
   }
 
   setButtonLabel(label) {
     if (this.labelNode) this.labelNode.textContent = label;
+  }
+
+  /** Refresh the grouped scope button, if this controller belongs to one. */
+  notifyGroup() {
+    try {
+      this.group?.update();
+    } catch {
+      /* the master button is best-effort UI: never break translation */
+    }
   }
 
   currentTargetLanguage() {
@@ -163,6 +189,7 @@ export class TranslatableNode {
       this.state = 'done';
       this.setLoading(false);
       this.renderTranslation();
+      this.notifyGroup();
     } catch (error) {
       if (this.destroyed) return;
       this.state = 'error';
@@ -180,6 +207,7 @@ export class TranslatableNode {
         error,
       });
       this.notifyFailure(error);
+      this.notifyGroup();
     }
   }
 
@@ -383,9 +411,9 @@ export class TranslatableNode {
         this.setButtonLabel(t('translate.button'));
         this.state = 'idle';
       }
+      this.notifyGroup();
       return;
     }
-
     if (
       this.state === 'idle' &&
       this.visible &&
@@ -394,6 +422,7 @@ export class TranslatableNode {
     ) {
       void this.translate();
     }
+    this.notifyGroup();
   }
 
   /** Render an already-cached translation without any request. */
@@ -404,9 +433,9 @@ export class TranslatableNode {
     });
     this.translatedBlocks = this.blocks.map((block) => block.translated);
     this.translatedTo = this.currentTargetLanguage();
-    this.translatedProvider = this.settings.provider;
     this.state = 'done';
     this.renderTranslation();
+    this.notifyGroup();
   }
 
   /** Remove all UI and restore original content. */
@@ -419,5 +448,6 @@ export class TranslatableNode {
     }
     this.removeTranslationBox();
     this.button?.remove();
+    this.notifyGroup();
   }
 }

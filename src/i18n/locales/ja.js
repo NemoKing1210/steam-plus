@@ -74,6 +74,7 @@ export default {
   'scope.gameReviews': 'ゲームのレビュー',
   'scope.profileComments': 'プロフィールのコメント',
   'scope.gameNews': 'ニュースとイベント',
+  'scope.guides': 'ガイド',
 
   'gamepage.title': 'ゲームページ',
   'gamepage.desc': 'Steamのゲームページを整理：読まないブロックを非表示に。',

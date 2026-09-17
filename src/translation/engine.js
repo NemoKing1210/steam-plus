@@ -1,4 +1,5 @@
 import { MAX_CONCURRENT_REQUESTS } from '../core/constants.js';
+import { t } from '../i18n/index.js';
 import { on } from '../core/bus.js';
 import { Codes, fail, logInfo } from '../core/debug.js';
 import { getSettings } from '../core/settings.js';
@@ -12,7 +13,11 @@ import {
   setCachedTranslation,
 } from './cache.js';
 import { isOwnUi, resolveTargetLanguage } from '../utils/dom.js';
-import { TranslatableNode } from './ui/controller.js';
+import {
+  buildTranslateButton,
+  setButtonLoading,
+  TranslatableNode,
+} from './ui/controller.js';
 
 /** @type {WeakMap<Element, TranslatableNode>} */
 const controllers = new WeakMap();
@@ -177,6 +182,104 @@ function scheduleVisibilityCheck() {
   });
 }
 
+/* ------------------------------------------------------------------ */
+/* Grouped scopes: one master button per scope drives every controller  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Scopes with `grouped: true` hide per-element buttons (the controller
+ * never inserts its own) and share a single master button placed before
+ * the first match. One page shows one guide, so the group is simply every
+ * live controller of the scope in the document.
+ */
+const groupButtons = new Map();
+
+function liveGroupControllers(target) {
+  const live = [];
+  forEachTargetElement(target, (element) => {
+    const controller = controllers.get(element);
+    if (controller && controller.attached && !controller.destroyed) live.push(controller);
+  });
+  return live;
+}
+
+function removeGroupButton(targetId) {
+  groupButtons.get(targetId)?.button.remove();
+  groupButtons.delete(targetId);
+}
+
+function onGroupButtonClick(target) {
+  const live = liveGroupControllers(target);
+  if (!live.length) {
+    removeGroupButton(target.id);
+    return;
+  }
+  if (live.some((controller) => controller.state === 'loading')) return;
+  if (live.some((controller) => controller.state !== 'done')) {
+    for (const controller of live) {
+      if (controller.state === 'idle' || controller.state === 'error') void controller.translate();
+    }
+  } else {
+    for (const controller of live) controller.renderOriginal();
+  }
+  updateGroupButton(target);
+}
+
+function ensureGroupButton(target, live) {
+  let group = groupButtons.get(target.id);
+  if (!group) {
+    const { button, label } = buildTranslateButton(`sp-group-${target.id}`);
+    button.classList.add('sp-translate-btn--above');
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onGroupButtonClick(target);
+    });
+    group = { target, button, label };
+    group.update = () => updateGroupButton(target);
+    groupButtons.set(target.id, group);
+  }
+  for (const controller of live) {
+    if (!controller.group) controller.group = group;
+  }
+  if (!group.button.isConnected && live.length) {
+    live[0].element.insertAdjacentElement('beforebegin', group.button);
+  }
+  return group;
+}
+
+function updateGroupButton(target) {
+  const live = liveGroupControllers(target);
+  const group = groupButtons.get(target.id);
+  if (!live.length) {
+    if (group) removeGroupButton(target.id);
+    return;
+  }
+  const active = group ?? ensureGroupButton(target, live);
+  for (const controller of live) {
+    if (!controller.group) controller.group = active;
+  }
+  if (!active.button.isConnected) {
+    live[0].element.insertAdjacentElement('beforebegin', active.button);
+  }
+  const hasError = live.some((controller) => controller.state === 'error');
+  if (live.some((controller) => controller.state === 'loading')) {
+    active.button.classList.remove('sp-translate-btn--error');
+    setButtonLoading(active.button, true);
+    active.label.textContent = t('translate.loadingShort');
+  } else {
+    setButtonLoading(active.button, false);
+    active.button.classList.toggle('sp-translate-btn--error', hasError);
+    if (live.every((controller) => controller.state === 'done')) {
+      active.label.textContent = t('translate.original');
+    } else if (hasError) {
+      active.label.textContent = t('translate.retry');
+    } else {
+      active.label.textContent = t('translate.button');
+    }
+  }
+}
+
 /** Sync cache read for the instant-cache setting (all blocks must hit). */
 function lookupBatchCache(translation, texts) {
   if (!texts.length) return null;
@@ -214,9 +317,21 @@ export function scanForTranslatable(root) {
       const controller = new TranslatableNode(element);
       controller.scopeId = target.id;
       controller.placeButton = target.placeButton ?? null;
+      controller.grouped = target.grouped === true;
       controller.attach(translation, translateTexts);
       if (!controller.attached) continue;
       controllers.set(element, controller);
+      if (controller.grouped) {
+        controller.setVisible();
+        if (translation.showCached !== false) {
+          const cached = lookupBatchCache(translation, controller.blockTexts);
+          if (cached !== null) controller.renderCached(cached);
+        }
+        if (translation.trigger === 'auto' && controller.state === 'idle') {
+          void controller.translate();
+        }
+        continue;
+      }
       if (translation.showCached !== false) {
         const cached = lookupBatchCache(translation, controller.blockTexts);
         if (cached !== null) {
@@ -227,6 +342,7 @@ export function scanForTranslatable(root) {
       }
       revealCheck(controller);
     }
+    if (target.grouped) updateGroupButton(target);
   }
 }
 
@@ -261,7 +377,10 @@ function pruneDisabledScopes() {
       .map((target) => target.id),
   );
   for (const target of listTargets()) {
-    if (!enabledIds.has(target.id)) forEachTargetElement(target, destroyController);
+    if (!enabledIds.has(target.id)) {
+      forEachTargetElement(target, destroyController);
+      removeGroupButton(target.id);
+    }
   }
 }
 
@@ -283,11 +402,15 @@ export function applyTranslationSettings() {
     forEachTargetElement(target, (element) => {
       controllers.get(element)?.onConfigChange(translation);
     });
+    if (target.grouped) updateGroupButton(target);
   }
 }
 
 function pruneAll() {
-  for (const target of listTargets()) forEachTargetElement(target, destroyController);
+  for (const target of listTargets()) {
+    forEachTargetElement(target, destroyController);
+    removeGroupButton(target.id);
+  }
 }
 
 let engineInitialized = false;

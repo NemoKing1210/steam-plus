@@ -74,6 +74,7 @@ export default {
   'scope.gameReviews': 'Отзывы к играм',
   'scope.profileComments': 'Комментарии в профиле',
   'scope.gameNews': 'Новости и события',
+  'scope.guides': 'Руководства',
 
   'gamepage.title': 'Страница игры',
   'gamepage.desc': 'Наведите порядок на страницах игр Steam: скрывайте ненужные блоки.',

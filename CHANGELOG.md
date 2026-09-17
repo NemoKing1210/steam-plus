@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.25.1] - 2026-09-17
+## [0.26.0] - 2026-09-17
 
-### Fixed
+### Added
 
-- Review Translate buttons no longer dock into the Regional prices header: the button-row search skips Steam Plus UI, and the translation scan ignores elements inside our own blocks
+- Guide translation: community guide pages (`sharedfiles/filedetails`) get a single Translate button above the guide that translates the whole content at once (title, top description, every section); guide comments were already covered by the Profile comments scope
+
+[0.26.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.26.0
 
 [0.25.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.25.1
 

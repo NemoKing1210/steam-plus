@@ -74,6 +74,7 @@ export default {
   'scope.gameReviews': 'Évaluations de jeux',
   'scope.profileComments': 'Commentaires de profil',
   'scope.gameNews': 'Actualités et événements',
+  'scope.guides': 'Guides',
 
   'gamepage.title': 'Page du jeu',
   'gamepage.desc': 'Épure les pages de jeux Steam : masque les blocs que tu ne lis jamais.',
