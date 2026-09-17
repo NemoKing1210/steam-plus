@@ -16,7 +16,7 @@ import {
  */
 export function applyGamepageSettings() {
   const { gamepage } = getSettings();
-  const css = gamepage?.enabled === false ? '' : buildGamepageCss(gamepage?.hidden);
+  const css = gamepage?.enabled === false ? '' : buildGamepageCss(gamepage?.hidden, gamepage?.compact);
   const wanted = isGamePageUrl(location.href) && css ? css : '';
   const existing = document.getElementById(GAMEPAGE_STYLE_ID);
   if (!wanted) {

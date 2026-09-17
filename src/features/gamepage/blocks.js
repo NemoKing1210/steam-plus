@@ -107,6 +107,12 @@ export const GAMEPAGE_BLOCKS = [
       '.game_page_autocollapse:has(> .game_area_description:not(#game_area_description):not(#game_area_content_descriptors):not(#game_area_legal))',
     ],
   },
+  {
+    id: 'earlyaccess',
+    labelKey: 'block.earlyaccess',
+    selectors: ['#earlyAccessHeader'],
+    compactSelectors: ['#earlyAccessHeader #earlyAccessBody', '#earlyAccessHeader .heading p'],
+  },
 ];
 
 export function getBlockIds() {
@@ -114,15 +120,22 @@ export function getBlockIds() {
 }
 
 /**
- * Build the hiding stylesheet for the enabled block ids. Returns an empty
- * string when nothing should be hidden.
+ * Build the hiding stylesheet for hidden blocks plus the slimming rules for
+ * blocks in compact mode (hidden wins when both flags are set).
+ * Returns an empty string when nothing should change.
  */
-export function buildGamepageCss(hidden) {
-  if (!hidden || typeof hidden !== 'object') return '';
+export function buildGamepageCss(hidden, compact) {
+  const hide = hidden && typeof hidden === 'object' ? hidden : {};
+  const slim = compact && typeof compact === 'object' ? compact : {};
   const rules = [];
   for (const block of GAMEPAGE_BLOCKS) {
-    if (hidden[block.id] !== true) continue;
-    rules.push(`${block.selectors.join(', ')} { display: none !important; }`);
+    if (hide[block.id] === true) {
+      rules.push(`${block.selectors.join(', ')} { display: none !important; }`);
+      continue;
+    }
+    if (slim[block.id] === true && Array.isArray(block.compactSelectors) && block.compactSelectors.length > 0) {
+      rules.push(`${block.compactSelectors.join(', ')} { display: none !important; }`);
+    }
   }
   return rules.join('\n');
 }

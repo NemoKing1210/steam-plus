@@ -77,15 +77,16 @@ steam-plus/
 │   │   └── settings/
 │   │       ├── index.js    # Settings entry: account-menu item + header
 │   │       │               #   fallback button, GM menu command, pages
-│   │       ├── panel.js    # Panel shell: home nav + pages (registerPage / togglePanel)
+│   │       ├── panel.js    # Panel shell: home nav + pages (registerPage / togglePanel / refreshPanelDraft)
 │   │       ├── controls.js # Row / switch / select / segmented / text / button
 │   │       └── tabs/
 │   │           ├── general.js       # Interface language, toasts, reset
 │   │           ├── translation.js   # Enabled, provider, trigger, display, scopes
-│   │           ├── gamepage.js      # Master switch + per-block hide grid
+│   │           ├── gamepage.js      # Master switch + per-block hide grid + Early Access tri-state
 │   │           ├── prices.js        # Regions, position, sort, display toggles
 │   │           ├── links.js         # External links list editor (templates, icons)
-│   │           └── region.js        # Mode, country, banner, proxy gateway
+│   │           ├── region.js        # Mode, country, banner, proxy gateway
+│   │           └── backup.js        # Settings export (file/clipboard) + validated import
 │   ├── styles/
 │   │   ├── tokens.css      # :root design tokens (sp- palette — DESIGN.md)
 │   │   └── app.css         # Injected styles, sp- prefix (GM_addStyle via build)
@@ -504,7 +505,8 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `translation.showCached` | `true` | Render cached translations instantly, no button press |
 | `translation.scopes.*` | all `true` | Per-target switches keyed by target id |
 | `gamepage.enabled` | `true` | Master switch for hiding blocks on store game pages |
-| `gamepage.hidden.*` | all `false` | Per-block hide flags keyed by block id (`media`, `purchase`, `description`, `dlc`, `sysreq`, `reviews`, `curators`, `events`, `details`, `recommendations`, `sale`, `edition`); nothing is hidden by default |
+| `gamepage.hidden.*` | all `false` | Per-block hide flags keyed by block id (`media`, `purchase`, `description`, `dlc`, `sysreq`, `reviews`, `curators`, `events`, `details`, `recommendations`, `sale`, `edition`, `earlyaccess` — the last is driven by the Early Access tri-state, not the grid); nothing is hidden by default |
+| `gamepage.compact.earlyaccess` | `false` | Slims the Early Access block to its header (hides the dev Q&A and subtitle); hidden wins when both are set |
 | `prices.enabled` | `true` | Master switch for the regional price comparison block |
 | `prices.autoLoad` | `true` | Load prices automatically; off shows a per-page load button |
 | `prices.regions` | 7 defaults | Compared store country codes (`cc`), in display order; unknown codes are ignored |
@@ -513,7 +515,7 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `prices.showOriginal` / `showDiscount` / `showSavings` / `highlightCheapest` / `showHomeRow` | all `true` | Display toggles: original price, discount badge, savings vs own price, cheapest highlight, own-price row |
 | `prices.convertTo` | `'auto'` | Display currency: `'auto'` (own store currency), `'off'`, or an ISO code — every price converts via live rates |
 | `prices.showConverted` | `true` | Show the converted price (`≈ …`) next to Steam's formatted price |
-| `prices.collapsed` | `false` | Start with the comparison block collapsed; the header chevron expands it |
+| `prices.collapsed` | `true` | Start with the comparison block collapsed; the header chevron expands it |
 | `prices.fxTtl` | `86400000` (24h) | Exchange rates cache lifetime: 1h / 6h / 24h / 7d; the Conversion section also shows the cached-rates status and a clear-cache button |
 | `links.enabled` | `true` | Master switch for the external links block |
 | `links.position` | `'purchase'` | Block placement: `'purchase'` (above buy options), `'sidebar'`, `'description'` |

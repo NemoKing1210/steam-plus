@@ -12,7 +12,9 @@ import {
 } from '../controls.js';
 import { bypassRegionBlock, isRegionInjected } from '../../region/bypass.js';
 import { isRegionBlockedPage } from '../../region/detect.js';
-
+import { openSearchOverlay } from '../../search/overlay.js';
+import { SEARCH_ROW_OPTIONS } from '../../../core/constants.js';
+import { PRICE_REGIONS } from '../../prices/regions.js';
 const PROXY_MODES = ['gateway', 'path', 'query'];
 
 export const regionTab = {
@@ -65,14 +67,16 @@ export const regionTab = {
       createField({
         label: t('region.country'),
         hint: t('region.countryDesc'),
-        control: createTextInput({
-          value: rg.countryCode || '',
-          placeholder: t('region.countryPlaceholder'),
-          maxLength: 2,
-          onChange: (value) => {
-            rg.countryCode = String(value || '').trim().toUpperCase();
+        control: createSelect(
+          [
+            { value: '', label: t('common.auto') },
+            ...PRICE_REGIONS.map((region) => ({ value: region.cc, label: `${region.name} (${region.cc})` })),
+          ],
+          rg.countryCode || '',
+          (value) => {
+            rg.countryCode = value;
           },
-        }),
+        ),
       }),
     );
     if (isRegionBlockedPage() && !isRegionInjected() && rg.enabled !== false) {
@@ -85,6 +89,42 @@ export const regionTab = {
       mainSection.appendChild(row);
     }
     pane.appendChild(mainSection);
+
+    const searchSection = createSection({ icon: 'search', title: t('region.searchTitle') });
+    searchSection.appendChild(createHint(t('region.searchDesc')));
+    searchSection.appendChild(
+      createSwitchRow({
+        checked: rg.searchEnabled !== false,
+        label: t('region.searchEnabled'),
+        onChange: (checked) => {
+          rg.searchEnabled = checked;
+        },
+      }),
+    );
+    searchSection.appendChild(createHint(t('region.searchEnabledDesc')));
+    const openRow = el('div', 'sp-cache-row');
+    openRow.appendChild(
+      createButton(t('region.searchOpen'), () => {
+        openSearchOverlay();
+      }),
+    );
+    searchSection.appendChild(openRow);
+    searchSection.appendChild(
+      createField({
+        label: t('region.searchRows'),
+        hint: t('region.searchRowsDesc'),
+        control: createSelect(
+          SEARCH_ROW_OPTIONS.map((rows) => ({ value: rows, label: String(rows) })),
+          rg.searchMaxRows,
+          (value) => {
+            rg.searchMaxRows = Number(value);
+          },
+        ),
+      }),
+    );
+    searchSection.appendChild(createHint(t('region.searchNote')));
+    searchSection.appendChild(createHint(t('region.searchHotkey')));
+    pane.appendChild(searchSection);
 
     const proxySection = createSection({ icon: 'swap', title: t('region.proxy') });
     proxySection.appendChild(createHint(t('region.proxyDesc')));

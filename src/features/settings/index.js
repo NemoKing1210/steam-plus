@@ -10,6 +10,7 @@ import { pricesTab } from './tabs/prices.js';
 import { linksTab } from './tabs/links.js';
 import { regionTab } from './tabs/region.js';
 import { cacheTab } from './tabs/cache-pane.js';
+import { backupTab } from './tabs/backup.js';
 import { aboutTab } from './tabs/about.js';
 
 registerPage(generalTab);
@@ -19,6 +20,7 @@ registerPage(pricesTab);
 registerPage(linksTab);
 registerPage(regionTab);
 registerPage(cacheTab);
+registerPage(backupTab);
 registerPage(aboutTab);
 
 const BUTTON_ID = 'sp-settings-btn';

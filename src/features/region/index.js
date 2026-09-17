@@ -4,20 +4,36 @@ import { logInfo } from '../../core/debug.js';
 import { watchStoreNavigation } from '../../utils/navigation.js';
 import { isRegionBlockedPage, isSupportedStoreUrl } from './detect.js';
 import { bypassRegionBlock, isRegionInjected } from './bypass.js';
-import { showRegionOffer } from './inject.js';
+import { OTHER_SITE_SELECTOR, showRegionOffer, syncOtherSiteReloadButton } from './inject.js';
 const LEGACY_GUEST_CACHE_KEY = 'sp_region_cache_v1';
 
-function evaluate(url) {
+let bypassedUrl = null;
+
+function buttonState(url) {
   const settings = getSettings().region;
-  if (!settings || settings.enabled === false) return;
-  if (!isSupportedStoreUrl(url)) return;
-  if (isRegionInjected()) return;
-  if (!isRegionBlockedPage()) return;
-  if (settings.mode === 'manual') {
+  if (!settings || settings.enabled === false) return { show: false, reloaded: false };
+  if (!isSupportedStoreUrl(url)) return { show: false, reloaded: false };
+  if (bypassedUrl !== null && url === bypassedUrl) return { show: true, reloaded: !isRegionBlockedPage() };
+  if (!isRegionInjected() && isRegionBlockedPage()) return { show: true, reloaded: false };
+  return { show: false, reloaded: false };
+}
+
+function evaluate(url) {
+  if (bypassedUrl !== null && url !== bypassedUrl) bypassedUrl = null;
+  const { show, reloaded } = buttonState(url);
+  syncOtherSiteReloadButton(show, { reloaded });
+  if (!show || !isRegionBlockedPage() || isRegionInjected()) return;
+  if (getSettings().region.mode === 'manual') {
     showRegionOffer();
     return;
   }
   void bypassRegionBlock();
+}
+
+export function refreshOtherSiteButton() {
+  if (!document.querySelector(OTHER_SITE_SELECTOR)) return;
+  const { show, reloaded } = buttonState(location.href);
+  syncOtherSiteReloadButton(show, { reloaded });
 }
 
 let regionSubscribed = false;
@@ -41,6 +57,10 @@ export function initRegionFeature() {
   regionSubscribed = true;
   on('settings:region', () => {
     if (getSettings().region.showBanner !== true) document.querySelector('.sp-region-banner')?.remove();
+    evaluate(location.href);
+  });
+  on('region:injected', (payload) => {
+    bypassedUrl = payload?.url || location.href;
     evaluate(location.href);
   });
   watchStoreNavigation((url) => evaluate(url));

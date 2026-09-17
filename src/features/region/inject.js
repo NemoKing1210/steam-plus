@@ -74,7 +74,53 @@ export function createRegionBanner({ viaProxy = false } = {}) {
   const reload = el('button', 'sp-button sp-button--ghost sp-region-banner__reload', t('region.reload'));
   reload.type = 'button';
   reload.addEventListener('click', () => bypassRegionBlock());
+  banner.append(badge, body, reload);
   return banner;
+}
+
+export const OTHER_SITE_SELECTOR = '.apphub_OtherSiteInfo';
+const OTHER_SITE_BUTTON_CLASS = 'sp-region-othersite-reload';
+
+function createOtherSiteReloadButton(reloaded) {
+  const button = el('a', `btnv6_blue_hoverfade btn_medium ${OTHER_SITE_BUTTON_CLASS}`);
+  button.tabIndex = 0;
+  button.setAttribute('role', 'button');
+  button.title = reloaded ? t('region.bannerBody') : t('region.offer');
+  button.appendChild(el('span', null, reloaded ? t('region.reload') : t('region.offerButton')));
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    void bypassRegionBlock();
+  });
+  button.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      void bypassRegionBlock();
+    }
+  });
+  return button;
+}
+
+export function syncOtherSiteReloadButton(visible, { reloaded = false } = {}) {
+  const label = reloaded ? t('region.reload') : t('region.offerButton');
+  const hint = reloaded ? t('region.bannerBody') : t('region.offer');
+  const panels = document.querySelectorAll(OTHER_SITE_SELECTOR);
+  if (!visible) {
+    document.querySelectorAll(`.${OTHER_SITE_BUTTON_CLASS}`).forEach((node) => node.remove());
+    return false;
+  }
+  if (!panels.length) return false;
+  panels.forEach((panel) => {
+    const existing = panel.querySelector(`:scope > .${OTHER_SITE_BUTTON_CLASS}`);
+    if (existing) {
+      const text = existing.querySelector('span');
+      if (text && text.textContent !== label) text.textContent = label;
+      if (existing.title !== hint) existing.title = hint;
+      return;
+    }
+    panel.appendChild(createOtherSiteReloadButton(reloaded));
+  });
+  return true;
 }
 
 export function insertBannerIntoGrid(root, banner) {

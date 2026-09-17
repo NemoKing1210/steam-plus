@@ -134,6 +134,17 @@ export function switchPanelPage(id) {
   renderCurrentView();
 }
 
+/**
+ * Re-read persisted settings into the open panel draft and repaint the
+ * current view. Used after an external change (backup import) that bypasses
+ * the footer Save flow.
+ */
+export function refreshPanelDraft() {
+  if (!draft) return;
+  draft = JSON.parse(JSON.stringify(getSettings()));
+  renderCurrentView();
+}
+
 function persistPanelForm() {
   if (!draft) return;
   const previousTarget = getSettings().translation.targetLanguage;

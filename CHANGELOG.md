@@ -7,6 +7,250 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-09-15
+
+### Added
+
+- Backup settings page: export all settings to a JSON file (or copy to clipboard) and import them back from a file, with envelope validation, overwrite confirmation, and live refresh of every feature
+
+[0.25.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.25.0
+
+## [0.24.2] - 2026-09-15
+
+### Changed
+
+- Regional prices block starts collapsed by default to save space; expand it with the header chevron or turn the default off in Prices settings
+
+[0.24.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.24.2
+
+## [0.24.1] - 2026-09-15
+
+### Changed
+
+- Game page settings use a page-blocks grid icon instead of the crossed-out eye, matching what the tab actually manages
+
+[0.24.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.24.1
+
+## [0.24.0] - 2026-09-15
+
+### Added
+
+- Game page settings gain an Early Access block mode (Full / Compact / Hidden): Compact slims `#earlyAccessHeader` down to its title by hiding the developer Q&A and subtitle text, Hidden removes the block entirely
+
+[0.24.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.24.0
+
+## [0.23.0] - 2026-09-15
+
+### Added
+
+- Region bypass adds a native Steam button to the `.apphub_OtherSiteInfo` panel on blocked store pages: it runs the same anonymous guest fetch as the offer card, and stays on guest-loaded pages for re-fetch (label switches to Reload) until navigation away
+
+### Fixed
+
+- Region notice banner rendered empty: the badge, body and Reload action were built but never appended — all three are now mounted, so the banner shows its title and working Reload button
+- Region panel button now also mounts when Steam renders `.apphub_OtherSiteInfo` after the initial check: every content scan re-syncs it, so late SPA renders no longer miss the button
+
+[0.23.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.23.0
+
+## [0.22.8] - 2026-09-10
+
+### Changed
+
+- Search result platform icons move to their own line under the date and review summary
+
+[0.22.8]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.8
+
+## [0.22.7] - 2026-09-10
+
+### Fixed
+
+- Search enrichment failed with “getSteamStoreLanguage is not defined” (surfaced by the new `SP-1416` diagnostic): the import was lost in an edit — restored, and a repeat scope audit confirms no other dangling references
+
+[0.22.7]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.7
+
+## [0.22.6] - 2026-09-10
+
+### Fixed
+
+- Search failures now always log a coded `SP-1416` console line with the term attached, so silent enrichment drops are diagnosable instead of invisible
+
+[0.22.6]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.6
+
+## [0.22.5] - 2026-09-10
+
+### Fixed
+
+- Region search always failed with “Cannot read properties of undefined (reading 'slice')”: the suggest parser lost its `return`, so every lookup ended in the error box — restored and covered with a live-data smoke test (real suggest and search-responses responses parse, merge and enrich correctly)
+
+[0.22.5]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.5
+
+## [0.22.4] - 2026-09-10
+
+### Changed
+
+- Search rows drop the uniform “Guest only” badge for native Steam platform icons next to date and review summary — and the extra home-region request goes away with it
+
+[0.22.4]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.4
+
+## [0.22.3] - 2026-09-10
+
+### Changed
+
+- Guest country picker moves out of the search overlay into Region settings: the overlay reads the configured country (Auto falls back to US) and keeps only the rows selector next to its input
+
+[0.22.3]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.3
+
+## [0.22.2] - 2026-09-10
+
+### Fixed
+
+- Region search settings tab crashed on open (`SEARCH_ROW_OPTIONS is not defined`): the constants import was lost in an edit — restored, and a scope-aware audit of every source file confirmed the remaining references resolve
+
+[0.22.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.2
+
+## [0.22.1] - 2026-09-10
+
+### Fixed
+
+- Search overlay opened without its input row: moving the rows selector dropped the box attachment and the controls container — both restored, the row (field plus inline rows selector) renders again
+
+[0.22.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.1
+
+## [0.22.0] - 2026-09-10
+
+### Changed
+
+- Search overlay rows selector moves inline into the search row (no label, `aria-label` kept); the settings block “Search suggestions” becomes “Search” with matching renames everywhere; store country is now a 24-region select (Auto keeps your country) instead of a free-text field
+
+[0.22.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.22.0
+
+## [0.21.1] - 2026-09-10
+
+### Changed
+
+- Region search overlay loses the Plus / Steam switch: it always searches the guest country (your region is still fetched behind the scenes for the “Guest only” badges), leaving country and row-count controls
+
+[0.21.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.21.1
+
+## [0.21.0] - 2026-09-10
+
+### Added
+
+- Search results now show game details: one `search/results` call per typed term fills in release date, review summary and the full price picture (struck original, bold final, green discount badge, Free label) — rows render instantly from suggestions and enrich in place, failures keep the basic rows
+
+[0.21.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.21.0
+
+## [0.20.5] - 2026-09-10
+
+### Added
+
+- Suggestion row choices grow from 3 / 6 / 10 to 3 / 5 / 8 / 10 / 15 / 20, in settings and directly in the search overlay
+
+[0.20.5]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.20.5
+
+## [0.20.4] - 2026-09-10
+
+### Added
+
+- Region search overlay opens with a fade-and-rise animation, offers a results-count selector (3 / 6 / 10) right in its controls row, and pins the page behind like the settings panel (scrollbar compensation, wheel/touch swallowed outside the results) — all reduced-motion safe
+
+[0.20.4]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.20.4
+
+## [0.20.3] - 2026-09-10
+
+### Fixed
+
+- Region settings tab crashed on open (`isRegionBlockedPage is not defined`): the `detect.js` import was lost in an edit — restored after a full identifier audit of every source file, which also confirmed no other dangling references remain
+
+[0.20.3]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.20.3
+
+## [0.20.2] - 2026-09-10
+
+### Fixed
+
+- Region search crashed on open (`onDocumentKeyDown is not defined`): the Escape handler was lost in an edit — restored and audited every search, settings and boot module for dangling references
+- Translation engine never started: `initTranslationEngine` was imported but never called, so the cache never loaded and settings changes never reached live controllers — wired into document boot
+
+[0.20.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.20.2
+
+## [0.20.1] - 2026-09-10
+
+### Fixed
+
+- Region search crashed on input (`getRegion is not defined`): the import was lost in an edit, and the suggest parser also missed its results array — both restored, plus the header replacement now skips complex filter forms (advanced search keeps working natively)
+
+[0.20.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.20.1
+
+## [0.20.0] - 2026-09-09
+
+### Added
+
+- Region search now replaces the native store search box: the Steam form is hidden and ours stands in its slot (same place, native placeholder), typing or `Enter` opens the “Search all regions” overlay with the text carried over — disable the switch to get the Steam box back untouched
+
+### Fixed
+
+- Search suggestions bypassed the proxy gateway: guest requests went direct while page bypasses used it, so proxy users always saw their own region — suggest traffic now routes through the same gateway
+
+[0.20.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.20.0
+
+## [0.19.1] - 2026-09-09
+
+### Changed
+
+- Region search no longer injects a button into the store header: the overlay opens via the `/` hotkey (outside text fields) or a new “Open region search” button in the Region settings tab — no duplicate search controls next to the native box in either header variant
+
+### Fixed
+
+- Guest-country picker showed the wrong selection when the stored country was outside the 24 preset regions — unknown codes now get a matching option instead
+
+[0.19.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.19.1
+
+## [0.19.0] - 2026-09-09
+
+### Added
+
+- Region search is now a full overlay modal instead of an auto-appearing panel: a magnifier button next to the store search box (either header variant) opens “Search all regions” with its own input, a Plus / Steam source switch for instant toggling between the guest country and your own, a 24-region guest-country picker (session-only, defaults to the region country or US), and per-row badges marking games missing from your region — loading, error-with-retry and empty states included, `Enter` jumps to the full Steam results page
+
+[0.19.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.19.0
+
+## [0.18.3] - 2026-09-09
+
+### Fixed
+
+- Store search box rendered late by Steam scripts never got the suggestion hook: attachment ran only at boot and on navigation — it now also runs on every scan root, so late-hydrated headers are picked up automatically
+- Scan loop never processed dynamic content: the observer filtered added nodes but never queued them, so rescans only ran once at boot — added nodes are scan roots again, as documented (this also revives translation of Steam re-renders)
+
+[0.18.3]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.18.3
+
+## [0.18.2] - 2026-09-09
+
+### Fixed
+
+- Guest search suggestions compared against too narrow a scope on the legacy search box, so native results could duplicate in the panel — the scope now climbs to the nearest stable search/header ancestor (no hashed classes)
+
+[0.18.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.18.2
+
+## [0.18.1] - 2026-09-09
+
+### Added
+
+- Region tab gains a Search suggestions section: master switch and row count (3 / 6 / 10) for the guest-region panel under the store search box
+
+### Fixed
+
+- Store country override never persisted: `normalizeRegion` computed the validated code but dropped it from the saved state, so guest requests (page bypass and search suggestions) always fell back to your own country — the code is now stored, and the search panel only appears when the guest result set actually differs from yours
+- Store search suggestions never rendered: the input handler called a guard that was never defined, throwing on every keystroke — the guard exists now and also honors the new switch
+
+[0.18.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.18.1
+
+## [0.18.0] - 2026-09-09
+
+### Added
+
+- Region search: the store search box now also finds games blocked in your region — while typing, guest-region suggestions are fetched anonymously (same country/proxy settings as the bypass) and shown in a Steam-styled panel under the search box with capsule art, name and guest price; only games the native dropdown misses are listed, opening one loads it through the region bypass, labelled in all 10 UI locales
+
+[0.18.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.18.0
+
 ## [0.17.1] - 2026-09-09
 
 ### Fixed

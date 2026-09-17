@@ -13,7 +13,8 @@
   --sp-text-strong: #ffffff;
   --sp-text-muted: #8f98a0;
   --sp-success: #a4d007;
-  --sp-danger: #c45c5c;
+  --sp-discount-bg: #4c6b22;
+  --sp-discount-fg: #beee11;
   --sp-border: #000000;
   --sp-line: rgba(255, 255, 255, 0.1);
   --sp-highlight: rgba(255, 255, 255, 0.04);

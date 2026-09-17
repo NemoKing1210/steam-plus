@@ -28,6 +28,14 @@ export const REGION_REQUEST_TIMEOUT_MS = 45000;
 export const REGION_BOOT_TIMEOUT_MS = 30000;
 /** Cap for loading missing guest bundles before replaying init scripts, ms. */
 export const REGION_ASSET_TIMEOUT_MS = 10000;
+/** Min typed chars before guest search suggestions are requested. */
+export const SEARCH_MIN_TERM_LENGTH = 2;
+/** Debounce for guest search suggestion requests, ms. */
+export const SEARCH_SUGGEST_DEBOUNCE_MS = 350;
+/** Max guest search rows (settings value is clamped to 1–this). */
+export const SEARCH_MAX_ROWS = 20;
+/** Row-count choices offered for guest search results. */
+export const SEARCH_ROW_OPTIONS = [3, 5, 8, 10, 15, 20];
 /** Debounce for DOM mutation rescans. */
 export const SCAN_DEBOUNCE_MS = 450;
 /** CSS class prefix used by every element we create (excluded from scans). */
@@ -56,7 +64,7 @@ const DEFAULT_TRANSLATION = {
   },
 };
 
-/** Game page block visibility: master switch + per-block hide flags. */
+/** Game page block visibility: master switch + per-block hide/compact flags. */
 const DEFAULT_GAMEPAGE = {
   /** Master switch for hiding blocks on store game pages. */
   enabled: true,
@@ -74,6 +82,11 @@ const DEFAULT_GAMEPAGE = {
     recommendations: false,
     sale: false,
     edition: false,
+    earlyaccess: false,
+  },
+  /** Block ids mapped to compact (slimmed) flags; hidden wins when both are set. */
+  compact: {
+    earlyaccess: false,
   },
 };
 
@@ -103,16 +116,18 @@ const DEFAULT_PRICES = {
   convertTo: 'auto',
   /** Show the converted price next to Steam's own formatted price. */
   showConverted: true,
-  /** Start with the comparison block collapsed to save space. */
-  collapsed: false,
-  /** Exchange rates cache lifetime, ms (1h / 6h / 24h / 7d). */
-  fxTtl: FX_RATES_TTL_MS,
+  /** Start with the comparison block collapsed; the header chevron expands it. */
+  collapsed: true,
 };
 
 /** Region bypass: guest reload of store pages blocked with “unavailable in your region”. */
 const DEFAULT_REGION = {
   /** Master switch for the region bypass. */
   enabled: true,
+  /** Show guest-region suggestions under the store search box. */
+  searchEnabled: true,
+  /** Max guest-only rows under the search box (1–10). */
+  searchMaxRows: 6,
   /** 'auto' — replace blocked pages immediately; 'manual' — show an offer button first. */
   mode: 'auto',
   /** Optional Steam store country override (`cc`) for guest requests, '' = keep mine. */

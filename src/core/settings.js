@@ -1,5 +1,5 @@
 import { SUPPORTED_LOCALES } from '../i18n/meta.js';
-import { getDefaults, SETTINGS_KEY } from './constants.js';
+import { getDefaults, SEARCH_MAX_ROWS, SETTINGS_KEY } from './constants.js';
 import { Codes, logError } from './debug.js';
 
 /* ------------------------------------------------------------------ */
@@ -63,9 +63,14 @@ function normalizeGamepage(raw, fallback) {
   for (const key of Object.keys(hidden)) {
     hidden[key] = raw?.hidden?.[key] === true;
   }
+  const compact = { ...fallback.compact };
+  for (const key of Object.keys(compact)) {
+    compact[key] = raw?.compact?.[key] === true;
+  }
   return {
     enabled: raw?.enabled !== false,
     hidden,
+    compact,
   };
 }
 
@@ -127,6 +132,11 @@ function normalizeRegion(raw, fallback) {
     enabled: raw?.enabled !== false,
     mode: REGION_MODES.includes(raw?.mode) ? raw.mode : fallback.mode,
     showBanner: raw?.showBanner === true,
+    countryCode: country,
+    searchEnabled: raw?.searchEnabled !== false,
+    searchMaxRows: Number.isInteger(raw?.searchMaxRows)
+      ? Math.min(SEARCH_MAX_ROWS, Math.max(1, raw.searchMaxRows))
+      : fallback.searchMaxRows,
     proxyEnabled: raw?.proxyEnabled === true,
     proxyHost: text(raw?.proxyHost, 253).trim(),
     proxyPort: text(raw?.proxyPort, 5).trim(),
@@ -159,7 +169,7 @@ function normalizePrices(raw, fallback) {
     showHomeRow: raw?.showHomeRow !== false,
     convertTo: normalizeConvertTo(raw?.convertTo, fallback.convertTo),
     showConverted: raw?.showConverted !== false,
-    collapsed: raw?.collapsed === true,
+    collapsed: raw?.collapsed !== false,
     fxTtl: FX_TTLS.includes(Number(raw?.fxTtl)) ? Number(raw.fxTtl) : fallback.fxTtl,
   };
 }

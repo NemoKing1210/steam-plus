@@ -45,6 +45,8 @@ export const Codes = {
   TRANSPLANT: 'SP-1414',
   /** Queue action (wishlist/follow/ignore) on a restored page failed. */
   REGION_QUEUE: 'SP-1415',
+  /** Region search run failed (logged once at the outermost point). */
+  SEARCH_FAILED: 'SP-1416',
 };
 
 const BADGE_STYLE =

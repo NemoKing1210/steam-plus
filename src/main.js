@@ -9,7 +9,9 @@ import { initSettingsFeature } from './features/settings/index.js';
 import { initGamepageFeature } from './features/gamepage/index.js';
 import { initPricesFeature } from './features/prices/index.js';
 import { initLinksFeature } from './features/links/index.js';
-import { initRegionFeature } from './features/region/index.js';
+import { initRegionFeature, refreshOtherSiteButton } from './features/region/index.js';
+import { initSearchFeature } from './features/search/index.js';
+import { mountSearchBoxes } from './features/search/box.js';
 import {
   createRegionBanner,
   insertBannerIntoGrid,
@@ -37,8 +39,10 @@ function runScan() {
   const roots = nodes.length ? nodes : [document];
   for (const node of roots) {
     if (isOwnUi(node)) continue;
+    mountSearchBoxes(node);
     scanForTranslatable(node);
   }
+  refreshOtherSiteButton();
 }
 
 const scheduleScan = debounce(runScan, SCAN_DEBOUNCE_MS);
@@ -49,7 +53,8 @@ function attachScanObserver() {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (node.nodeType !== Node.ELEMENT_NODE) continue;
-        if (node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-prices, .sp-links, .sp-region-banner, .sp-region-offer, .sp-region-status, .sp-region-loader')) continue;
+        if (node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-prices, .sp-links, .sp-region-banner, .sp-region-offer, .sp-region-status, .sp-region-loader, .sp-region-othersite-reload, .sp-search-overlay, .sp-searchbox')) continue;
+        pendingScanNodes.push(node);
       }
     }
     if (pendingScanNodes.length) scheduleScan();
@@ -72,6 +77,8 @@ function bootDocument() {
   initPricesFeature();
   initLinksFeature();
   initRegionFeature();
+  initSearchFeature();
+  initTranslationEngine();
   attachScanObserver();
   scheduleScan();
 }

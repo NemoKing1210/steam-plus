@@ -46,7 +46,7 @@ Steam palette; do not hardcode raw hexes in component CSS.
 | `--sp-text-strong` | `#ffffff` | headings, nav titles, hovered text |
 | `--sp-text-muted` | `#8f98a0` | secondary text, hints, nav descriptions |
 | `--sp-success` | `#a4d007` | positive states (cracked badge, active dot) |
-| `--sp-danger` | `#c45c5c` | destructive buttons/errors |
+| `--sp-discount-bg` / `--sp-discount-fg` | `#4c6b22` / `#beee11` | store-green discount badge |
 | `--sp-border` | `#000000` | hard borders (Steam outline style) |
 | `--sp-line` | `rgba(255,255,255,0.1)` | soft dividers |
 | `--sp-highlight` | `rgba(255,255,255,0.04)` | inner top highlight on raised surfaces |
@@ -249,6 +249,14 @@ scopes. Hiding itself is CSS (`#sp-gamepage-style`,
 `display: none !important` per enabled block) — no injected buttons or
 boxes on the store page, so nothing here needs a scan exclusion.
 
+### Backup page
+Two section cards reusing `.sp-button` tones and `.sp-hint` status lines
+(`aria-live="polite"`): Export (accent download + ghost copy-to-clipboard)
+and Import (ghost file picker). Import validates the JSON envelope,
+confirms the overwrite via `confirmDialog`, then persists through
+`saveSettings()` and re-emits every `settings:*` event — no new
+components or styles.
+
 ### Regional prices (`.sp-prices`)
 Sunken info panel (`rgba(0,0,0,.25)` wash, black border, inner highlight)
 that reads as a Steam store section: uppercase accent header with a muted
@@ -280,6 +288,35 @@ inputs (`.sp-input`, `--ghost` up/down/remove buttons, per-card enable
 switch) and a live preview line showing the resolved URL; invalid
 templates get `.is-invalid` (danger ring) and never render a chip.
 A ghost Open button per card tests the resolved link.
+
+### Region search (`.sp-searchbox`, `.sp-search-overlay`, `.sp-search`)
+The native store search form is hidden (`display: none`, restored on
+disable) and our box (`.sp-searchbox`) takes its slot in the same parent,
+so layout never shifts: sunken deep-welled field adopting the native
+placeholder, accent loupe button. Typing, focus or `Enter` opens the
+overlay modal with the typed text carried over and searched immediately;
+`/` anywhere outside editable fields focuses the box instead. The modal
+(`.sp-search`, `min(640px, 100%)`, panel gradient, black border) enters
+with `sp-search-in` (fade + 10px rise + slight scale, `.2s`) over an
+`sp-fade-in` backdrop (both off under `prefers-reduced-motion`) and pins
+the page behind exactly like the settings panel (`sp-modal-open` +
+scrollbar compensation, wheel/touch swallowed outside `.sp-search__results`;
+the panel's own lock wins while it stays open). Content: a sunken input
+row carrying an inline labelless rows select, autofocused input (`Enter`
+jumps to the full Steam results page) and a scrolling result list. The
+guest country comes from the Region settings (country select, `Auto` keeps
+your own); the rows select (3 / 5 / 8 / 10 / 15 / 20) persists to settings
+without closing the modal. Rows (`.sp-search__row`, real links to `/app/<id>`
+over on open): 92px capsule thumb with a letter fallback, 13px ellipsized
+name, muted meta line (release date • review summary) plus a platforms row
+with native Steam icons (reused `platform_img` classes, all filled in after
+one `search/results` call per typed term and merged by appid), price block
+(struck original + bold final + green discount badge, `search.free` for
+free games, guest string as fallback). States reuse panel tones
+(ring spinner + `search.loading`, `region.errorFailed` with a Retry button,
+`search.empty`). Closes on `×`, `Escape`, backdrop click and store
+navigation; `z-index` 900000 (under the settings panel). Box and overlay
+are excluded from content scans.
 
 ### Translation UI (`.sp-translate-btn`, `.sp-translation`)
 Inline per-block control: icon + label in translucent accent fill
@@ -314,8 +351,14 @@ Injected content keeps Steam's own wrappers (`.game_page_background` /
 `#tabletGrid`), so the store layout applies untouched; the only addition is
 a sunken notice banner (`.sp-region-banner`) docked at the top of the grid:
 uppercase accent badge, bold white title, muted details line (proxy
-source appended when true) and a ghost Reload action. All four classes stay
-excluded from content scans via `isOwnUi()` and the observer filter.
+source appended when true) and a ghost Reload action. On blocked pages the
+feature also appends a native Steam button (`<a class="btnv6_blue_hoverfade
+btn_medium sp-region-othersite-reload">`) to every `.apphub_OtherSiteInfo`
+panel; it triggers the same guest fetch. While the error is visible the
+label is `region.offerButton` (tooltip `region.offer`); after the page is
+guest-loaded the button stays for re-fetch with label `region.reload`
+(tooltip `region.bannerBody`) until navigation away. All region classes
+stay excluded from content scans via `isOwnUi()` and the observer filter.
 
 ## 6. Motion
 
