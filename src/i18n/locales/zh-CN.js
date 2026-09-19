@@ -74,6 +74,7 @@ export default {
   'scope.gameReviews': '游戏评测',
   'scope.profileComments': '个人资料评论',
   'scope.gameNews': '新闻与活动',
+  'scope.newsArticle': '新闻文章页面',
   'scope.guides': '指南',
 
   'gamepage.title': '游戏页面',

@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-09-19
+
+### Added
+
+- News article translation: store news pages (`/news/app/<id>/view/<gid>`) get a single Translate button above the headline that translates the whole article at once (headline + body), like guides; hub summaries keep their per-card buttons through the News and events scope
+
 ## [0.26.0] - 2026-09-17
 
 ### Added
 
 - Guide translation: community guide pages (`sharedfiles/filedetails`) get a single Translate button above the guide that translates the whole content at once (title, top description, every section); guide comments were already covered by the Profile comments scope
 
+[0.27.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.27.0
 [0.26.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.26.0
 
 [0.25.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.25.1

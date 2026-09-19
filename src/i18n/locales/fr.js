@@ -74,6 +74,7 @@ export default {
   'scope.gameReviews': 'Évaluations de jeux',
   'scope.profileComments': 'Commentaires de profil',
   'scope.gameNews': 'Actualités et événements',
+  'scope.newsArticle': 'Pages d’actualités',
   'scope.guides': 'Guides',
 
   'gamepage.title': 'Page du jeu',

@@ -74,6 +74,7 @@ export default {
   'scope.gameReviews': '게임 리뷰',
   'scope.profileComments': '프로필 댓글',
   'scope.gameNews': '뉴스 및 이벤트',
+  'scope.newsArticle': '뉴스 기사 페이지',
   'scope.guides': '가이드',
 
   'gamepage.title': '게임 페이지',

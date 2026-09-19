@@ -274,6 +274,7 @@ to dock the button into the Yes/No/Funny/Award row). Registered scopes
 | `gameReviews` | `.review_text, .apphub_CardTextContent` + new React review UI (hashed body class, `div:has(> h1:first-child)` fallback) | Store/community reviews incl. the new client UI |
 | `profileComments` | `.commentthread_comment_text` | Profiles, hubs, shared files |
 | `gameNews` | `.eventspage_content_body, .eventText, .news_event_summary, .blotter_daily_rollup_line .blotter_content` | Event/news detail bodies, hub summaries |
+| `newsArticle` | `div:has(+ .EventDetail) > div:last-child, .EventDetailsBody` | Store news article headline + body behind one grouped master button (hub summaries via `gameNews`) |
 | `guides` | `.guideTop .workshopItemTitle, .guideTopDescription, .subSectionTitle, .subSectionDesc` | Guide title, top description, section titles + bodies behind one grouped master button (comments via `profileComments`) |
 
 ### `src/translation/ui/controller.js` — `TranslatableNode`

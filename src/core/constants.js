@@ -61,6 +61,7 @@ const DEFAULT_TRANSLATION = {
     gameReviews: true,
     profileComments: true,
     gameNews: true,
+    newsArticle: true,
     guides: true,
   },
 };

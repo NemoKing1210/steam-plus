@@ -74,6 +74,7 @@ export default {
   'scope.gameReviews': 'ゲームのレビュー',
   'scope.profileComments': 'プロフィールのコメント',
   'scope.gameNews': 'ニュースとイベント',
+  'scope.newsArticle': 'ニュース記事ページ',
   'scope.guides': 'ガイド',
 
   'gamepage.title': 'ゲームページ',
