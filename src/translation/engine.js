@@ -12,7 +12,7 @@ import {
   loadMemoryCache,
   setCachedTranslation,
 } from './cache.js';
-import { isOwnUi, resolveTargetLanguage } from '../utils/dom.js';
+import { eachNode, isOwnUi, resolveTargetLanguage } from '../utils/dom.js';
 import {
   buildTranslateButton,
   setButtonLoading,
@@ -311,15 +311,15 @@ export function scanForTranslatable(root) {
       });
       continue;
     }
-    for (const element of elements) {
-      if (isOwnUi(element)) continue;
-      if (controllers.has(element)) continue;
+    eachNode(elements, (element) => {
+      if (isOwnUi(element)) return;
+      if (controllers.has(element)) return;
       const controller = new TranslatableNode(element);
       controller.scopeId = target.id;
       controller.placeButton = target.placeButton ?? null;
       controller.grouped = target.grouped === true;
       controller.attach(translation, translateTexts);
-      if (!controller.attached) continue;
+      if (!controller.attached) return;
       controllers.set(element, controller);
       if (controller.grouped) {
         controller.setVisible();
@@ -330,18 +330,18 @@ export function scanForTranslatable(root) {
         if (translation.trigger === 'auto' && controller.state === 'idle') {
           void controller.translate();
         }
-        continue;
+        return;
       }
       if (translation.showCached !== false) {
         const cached = lookupBatchCache(translation, controller.blockTexts);
         if (cached !== null) {
           controller.renderCached(cached);
           revealNow(controller);
-          continue;
+          return;
         }
       }
       revealCheck(controller);
-    }
+    });
     if (target.grouped) updateGroupButton(target);
   }
 }
@@ -358,7 +358,7 @@ function forEachTargetElement(target, fn) {
   } catch {
     return;
   }
-  for (const element of elements) fn(element);
+  eachNode(elements, (element) => fn(element));
 }
 
 function destroyController(element) {

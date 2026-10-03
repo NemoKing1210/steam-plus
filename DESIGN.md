@@ -289,6 +289,58 @@ switch) and a live preview line showing the resolved URL; invalid
 templates get `.is-invalid` (danger ring) and never render a chip.
 A ghost Open button per card tests the resolved link.
 
+### Add-on content (`.sp-dlc`)
+Sunken info panel like regional prices (same wash, black border, inner
+highlight): an uppercase accent header carrying the owned/total counter pill
+(`is-on` in store green when every add-on is owned), a muted
+`Loading 3/12` / `Updated 14:05` stamp, a ghost ⟳ refresh and the collapsing
+chevron (`is-collapsed` hides body + hint, chevron rotates). Rows live in a
+scrollable `<ul>` (max 320px): a 64×24 add-on capsule image inside a
+`.sp-dlc__thumb-btn` (`zoom-in` cursor, accent border on hover/focus; clicking
+it opens the image viewer on that add-on's gallery), an ellipsized add-on name
+linking to its store page and a
+right-aligned meta group that wraps in narrow placements — price group
+(struck original, bold final, store-green discount badge; `sp-dlc__soon` for
+unreleased add-ons, `--sp-success` final for free ones) followed by the muted
+release date (`sp-dlc__date`). Ownership carries no glyph: owned rows get a
+faint green wash, a muted name and an ON "Owned" pill instead of a price
+(`.sp-dlc__row.is-owned`). Every add-on of the game is listed — names and
+prices come from the page's own DLC section first; the capsules Steam keeps
+collapsed and the release dates are requested once the collapsed block is
+expanded and fill in progressively, and switching off any of the image/date/
+price toggles also switches off its request.
+
+### Image viewer (`.sp-viewer-overlay`, `.sp-viewer`)
+Fullscreen Steam-styled lightbox for injected images (`src/ui/viewer.js`),
+`z-index: 999999` (under the settings panel, over the region search) over a
+`rgba(0,0,0,.9)` backdrop; it locks the page behind it with the shared
+`sp-modal-open` scroll lock. Layout: a bar (bold white image title + muted
+`3 / 12` counter on the left, ghost tool buttons −/+ ⟳ ⤢ × on the right),
+a centred stage, an optional thumbnail strip and a muted one-line usage hint.
+The image fits the stage (`max-width/height: 100%`, `object-fit: contain`) and
+is transformed for zoom/pan/rotation (`translate … scale … rotate`), with a
+grab cursor and no transition while dragging. Navigation renders as two tall
+ghost ‹ › buttons over the stage, disabled at the ends when wrap-around is off
+and hidden for a single image. The thumbnail strip is a horizontal rail of
+92×35 store capsules (active one gets an accent border, hover a soft accent
+border, hidden when the gallery has one image). Tool buttons use the neutral
+ghost gradient, close turns red on hover; focus rings follow §7, motion is
+dropped under `prefers-reduced-motion`. Keyboard: `Esc`, `←`/`→`, `Home`/`End`,
+`+`/`−`, `0`, `r`; wheel zooms, drag pans (swipe navigates at fit zoom),
+double click toggles 2×, pinch zooms on touch. Clicking an arrow, a tool
+button, a thumbnail or the image itself only performs that action — the stage
+captures the pointer for panning, so those presses are resolved before the
+click and never fall through to the "click the empty area closes" rule; a
+drag or swipe is never treated as a click, and only a click on the empty stage
+area (or the backdrop) closes the viewer and restores the page scroll
+position. A failed image shows the
+danger-bordered status card instead. Excluded from content scans.
+
+The displayed image can be upgraded in place through the caller's async
+`resolveImage` hook (spinner stays up until the better source loads) — the
+add-on block uses it to replace the small row capsule with the add-on's full
+store image.
+
 ### Region search (`.sp-searchbox`, `.sp-search-overlay`, `.sp-search`)
 The native store search form is hidden (`display: none`, restored on
 disable) and our box (`.sp-searchbox`) takes its slot in the same parent,

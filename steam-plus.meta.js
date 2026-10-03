@@ -10,7 +10,7 @@
 // @name:ko            Steam Plus
 // @name:pl            Steam Plus
 // @namespace          https://github.com/NemoKing1210/steam-plus
-// @version            0.27.0
+// @version            0.30.2
 // @author             NemoKing1210
 // @description        Improves Steam functionality
 // @description:ru     Улучшает функционал Steam

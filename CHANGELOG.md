@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.2] - 2026-10-03
+
+### Fixed
+
+- Image viewer no longer closes (and jumps the page) when clicking the ‹ › arrows, the image itself or a thumbnail: the stage used to capture the pointer for panning, which retargeted every click inside it to the stage, whose "click on empty area closes" rule then fired. Controls inside the stage now keep their own clicks, a click on the image is never a close, and any drag or swipe is ignored as a click; only a click on the empty stage area (or the backdrop) closes the viewer
+
+[0.30.2]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.30.2
+
+## [0.30.1] - 2026-10-03
+
+### Fixed
+
+- "is not iterable" crash when opening an add-on image in the viewer: that environment (an engine whose DOM collections have no iterator protocol) threw on every `for...of` over a NodeList/`NodeList`-like, so the gallery build, the scan observer, the search box mount, suggestion parsing and the segmented refresh now iterate by index via the new `eachNode()` helper; verified against a bundle run with `NodeList`/`HTMLCollection`/`DOMTokenList` iteration removed
+- The image viewer no longer depends on the iterator protocol anywhere: the gallery is copied into a plain array on open, thumbnails and labels are built with index loops, pinch detection reads the pointer map with `forEach`, and the add-on cache persists/trims through `Map#forEach`
+
+[0.30.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.30.1
+
+## [0.30.0] - 2026-10-03
+
+### Added
+
+- Image viewer (`src/ui/viewer.js`): fullscreen Steam-styled lightbox for injected images — fit to screen, zoom (wheel, `+`/`−`, double click, pinch), drag to pan, 90° rotation, prev/next with optional wrap-around, thumbnail strip, neighbour preloading, keyboard shortcuts (`Esc`, `←`/`→`, `Home`/`End`, `+`, `−`, `0`, `r`), focus restore and a failure card; labels are localizable and overridable per call
+- Add-on content: clicking an add-on image opens the viewer on the block's whole gallery (largest available image per add-on, starting at the clicked row); new Add-ons settings section with **Enlarge on click**, **Thumbnail strip** and **Wrap around**
+
+[0.30.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.30.0
+
+## [0.29.1] - 2026-10-03
+
+### Changed
+
+- Add-on rows drop the ✓/○ ownership glyph; ownership stays readable through the green row wash and the "Owned" pill that replaces the price, leaving the row cleaner next to the capsule image and release date
+
+[0.29.1]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.29.1
+
+## [0.29.0] - 2026-10-03
+
+### Added
+
+- Add-on content rows now show the add-on's capsule image and its release date ("22 Feb, 2018"), filling in progressively as each detail arrives; new Add-ons settings toggles **Add-on images** and **Release dates**
+
+### Changed
+
+- Add-on details are requested with the page's own store country and language, so fallback prices match the prices Steam already rendered on the page; add-on images, prices and release dates share the same one-day cache
+
+[0.29.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.29.0
+
+## [0.28.0] - 2026-10-03
+
+### Added
+
+- Add-on content block on store game pages: lists every DLC of the game with its price and whether your account already owns it, with an owned/total counter, clickable store links per row, "not owned first" ordering, and a header chevron — collapsed by default, it reads the page's own DLC list first and requests only the entries Steam does not render (names and prices cached for a day, ownership for 30 minutes)
+- Add-ons settings page: master switch, block position (above buy options / sidebar / below description), row order, start-collapsed, owned counter, owned-rows and price toggles, plus an add-on cache reset
+
+[0.28.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.28.0
+
 ## [0.27.0] - 2026-09-19
 
 ### Added

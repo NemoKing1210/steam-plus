@@ -1,34 +1,11 @@
 import { on } from '../../core/bus.js';
 import { getSettings } from '../../core/settings.js';
-import { logInfo } from '../../core/debug.js';
+import { Codes, logWarn } from '../../core/debug.js';
 import { isGamePageUrl } from '../gamepage/blocks.js';
 import { watchStoreNavigation } from '../../utils/navigation.js';
+import { placeGameBlock, resolveGameAnchor } from '../../utils/gameAnchors.js';
 import { getGameContext, parseAppId } from './template.js';
 import { createLinksRoot, paintLinks } from './ui.js';
-
-function resolveAnchor(position) {
-  const pick = (selector) => document.querySelector(selector);
-  if (position === 'sidebar') {
-    const target = pick('.rightcol.game_meta_data') ?? pick('#game_area_purchase');
-    return { target, mode: target?.classList.contains('game_meta_data') ? 'prepend' : 'before' };
-  }
-  if (position === 'description') {
-    return { target: pick('#game_area_description') ?? pick('#game_area_purchase'), mode: 'after' };
-  }
-  return { target: pick('#game_area_purchase') ?? pick('#game_area_description'), mode: 'before' };
-}
-
-function placeRoot(root, anchor) {
-  if (!anchor?.target) return false;
-  if (anchor.mode === 'prepend') {
-    anchor.target.insertBefore(root, anchor.target.firstChild);
-  } else if (anchor.mode === 'before') {
-    anchor.target.before(root);
-  } else {
-    anchor.target.after(root);
-  }
-  return root.isConnected;
-}
 
 let current = null;
 
@@ -49,8 +26,8 @@ export function applyLinksSettings() {
   const items = Array.isArray(links?.items) ? links.items.filter((item) => item?.enabled !== false && item?.name && item?.url) : [];
   if (!items.length) return;
   const root = createLinksRoot();
-  if (!placeRoot(root, resolveAnchor(links?.position))) {
-    logInfo('links', 'no anchor for external links', { appid });
+  if (!placeGameBlock(root, resolveGameAnchor(links?.position))) {
+    logWarn(Codes.NO_ANCHOR, 'no anchor for external links', { appid, url: location.href });
     return;
   }
   const painted = paintLinks(root, {

@@ -26,11 +26,34 @@ export function debounce(fn, delay) {
 }
 
 /**
+ * Iterate a DOM collection (NodeList, HTMLCollection, `addedNodes`) or any
+ * array-like by index. DOM collections are only iterable in newer engines —
+ * and not in the one Steam's embedded browser ships — so `for...of` over
+ * them throws "is not iterable" there.
+ */
+export function eachNode(collection, callback) {
+  if (!collection) return;
+  for (let index = 0; index < collection.length; index += 1) callback(collection[index], index);
+}
+
+/**
+ * Copy a DOM collection (NodeList, HTMLCollection, `childNodes`) or any
+ * array-like into a plain array. Also needed on engines whose collections
+ * are not iterable, where `[...collection]` throws.
+ */
+export function toArray(collection) {
+  const items = [];
+  if (!collection) return items;
+  for (let index = 0; index < collection.length; index += 1) items.push(collection[index]);
+  return items;
+}
+
+/**
  * Whether the element belongs to Steam Plus UI (and must be skipped
  * by content scans).
  */
 export function isOwnUi(node) {
-  return node instanceof Element && !!node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-translation, .sp-translate-btn, .sp-prices, .sp-links, .sp-region-banner, .sp-region-offer, .sp-region-status, .sp-region-loader, .sp-region-othersite-reload, .sp-search-overlay, .sp-searchbox');
+  return node instanceof Element && !!node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-translation, .sp-translate-btn, .sp-prices, .sp-links, .sp-dlc, .sp-viewer-overlay, .sp-region-banner, .sp-region-offer, .sp-region-status, .sp-region-loader, .sp-region-othersite-reload, .sp-search-overlay, .sp-searchbox');
 }
 
 /**

@@ -38,10 +38,21 @@ src/
 │   ├── cache.js             # GM-backed price cache (1h TTL)
 │   ├── ui.js                # comparison block renderer
 │   └── index.js             # mount/teardown, anchors, bus listener
+├── features/dlc/
+│   ├── api.js               # add-on ids/details + store-page prefill + owned apps
+│   ├── cache.js             # GM-backed add-on/ownership cache
+│   ├── ui.js                # add-on block renderer (rows, ownership, collapse)
+│   └── index.js             # mount/teardown, lazy detail loading, bus listener
 ├── styles/
 │   ├── tokens.css           # :root design tokens (see DESIGN.md)
 │   └── app.css              # injected styles (sp- prefix)
-└── utils/dom.js             # el(), debounce(), resolveTargetLanguage()
+├── ui/
+│   ├── toast.js             # toast notifications
+│   └── viewer.js            # fullscreen image viewer (zoom, pan, rotate, gallery)
+└── utils/
+    ├── dom.js               # el(), debounce(), resolveTargetLanguage()
+    ├── gameAnchors.js       # shared store game-page block anchors
+    └── scrollLock.js        # counted page scroll lock for modal overlays
 ```
 
 ## Data flow (translation)
@@ -82,6 +93,25 @@ store navigation / settings:prices → applyPricesSettings()
       — free games hide the block
 ```
 
+## Data flow (add-on content)
+
+```
+store navigation / settings:dlc → applyDlcSettings()
+  → mount(appid): anchor by settings.dlc.position (shared gameAnchors helper)
+  → fetchGameAddons(appid): appdetails dlc ids (24h GM cache)
+  → fetchOwnedApps(): dynamicstore/userdata rgOwnedApps (30min GM cache,
+      signed-in only — signed out the rows drop the ownership marks)
+  → readAddonSection(): names, prices and capsule images already rendered by
+      the store page
+  → paintDlc(): rows (not-owned first, thumbnail + release date), header
+      counter, collapsed by default
+  → first expand → loadAddonDetails(missing ids, max 3 concurrent,
+      filters=basic,release_date,price_overview, page store country)
+      patches each row in place; every detail cached for 24h
+  → click a row image → openViewer(): the block's gallery, largest image first
+      (ui/viewer.js: fit, zoom/pan/rotate, thumbnails, arrows, Esc)
+```
+
 ## Conventions
 
 - Every element created by the script uses the `sp-` CSS prefix and is
@@ -90,4 +120,4 @@ store navigation / settings:prices → applyPricesSettings()
   `styles/tokens.css` (`var(--sp-*)`).
 - Settings are normalized on load/save; features subscribe via the bus
   (`settings:translation`, `settings:gamepage`, `settings:prices`,
-  `settings:language`).
+  `settings:links`, `settings:dlc`, `settings:language`).

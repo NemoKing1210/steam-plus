@@ -2,6 +2,7 @@ import { REGION_REQUEST_TIMEOUT_MS } from '../../core/constants.js';
 import { Codes, fail, logError, logInfo } from '../../core/debug.js';
 import { t } from '../../i18n/index.js';
 import { showToast } from '../../ui/toast.js';
+import { toArray } from '../../utils/dom.js';
 import { getCookie, getStoreCountryCode } from './request.js';
 import { getStorePageId, isHostLoggedIn } from './detect.js';
 
@@ -24,8 +25,8 @@ export function parseLiveSession(root = document) {
   let sessionId = '';
   let accountId = 0;
   const scripts = root.querySelectorAll?.('script:not([src])') ?? [];
-  for (const node of scripts) {
-    const code = node.textContent || '';
+  for (let index = 0; index < scripts.length; index += 1) {
+    const code = scripts[index].textContent || '';
     if (!sessionId) {
       const match = code.match(SESSION_RE);
       if (match) sessionId = match[1];
@@ -408,11 +409,11 @@ export function restoreQueueActions() {
       .forEach((node) => {
         if (node.querySelector('a[href*="/login"]')) node.remove();
       });
-    const head = [...template.content.children];
+    const head = toArray(template.content.children);
     head.forEach((node) => container.insertBefore(node, shareBtn));
     const tail = document.createElement('template');
     tail.innerHTML = buildQueueTail().trim();
-    [...tail.content.children].forEach((node) => container.appendChild(node));
+    toArray(tail.content.children).forEach((node) => container.appendChild(node));
     if (!document.getElementById('queueCtn')) {
       container.closest('.queue_ctn')?.setAttribute('id', 'queueCtn');
     }

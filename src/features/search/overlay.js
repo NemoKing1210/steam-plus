@@ -3,6 +3,7 @@ import { getSettings, saveSettings } from '../../core/settings.js';
 import { Codes, logError } from '../../core/debug.js';
 import { t } from '../../i18n/index.js';
 import { debounce, el } from '../../utils/dom.js';
+import { lockPageScroll, unlockPageScroll } from '../../utils/scrollLock.js';
 import {
   fetchGuestSuggestions,
   fetchSearchDetails,
@@ -20,7 +21,6 @@ let rowsSelect = null;
 let results = null;
 let note = null;
 let state = null;
-let scrollLock = null;
 
 function isSearchEnabled() {
   const region = getSettings().region;
@@ -307,11 +307,6 @@ export function closeSearchOverlay() {
   unlockScroll();
 }
 
-function isPanelOverlayOpen() {
-  const panel = document.getElementById('sp-panel-overlay');
-  return !!panel && !panel.hasAttribute('hidden');
-}
-
 function onOverlayScrollGuard(event) {
   if (!state) return;
   const scroller = overlay?.querySelector('.sp-search__results');
@@ -320,30 +315,13 @@ function onOverlayScrollGuard(event) {
 }
 
 function lockScroll() {
-  // The settings panel owns its own lock: while it stays open the page
-  // remains pinned by it, so the overlay must not touch body styles.
-  if (scrollLock || isPanelOverlayOpen()) return;
-  const root = document.documentElement;
-  const body = document.body;
-  const y = window.scrollY || root.scrollTop || body.scrollTop || 0;
-  const pad = Math.max(0, window.innerWidth - root.clientWidth);
-  scrollLock = { y, pad: body.style.paddingRight };
-  root.classList.add('sp-modal-open');
-  if (pad) body.style.paddingRight = `${pad}px`;
-  body.style.top = `-${y}px`;
+  lockPageScroll();
   document.addEventListener('wheel', onOverlayScrollGuard, { passive: false, capture: true });
   document.addEventListener('touchmove', onOverlayScrollGuard, { passive: false, capture: true });
 }
 
 function unlockScroll() {
-  if (!scrollLock) return;
-  if (isPanelOverlayOpen()) return;
-  const { y, pad } = scrollLock;
-  scrollLock = null;
   document.removeEventListener('wheel', onOverlayScrollGuard, { capture: true });
   document.removeEventListener('touchmove', onOverlayScrollGuard, { capture: true });
-  document.documentElement.classList.remove('sp-modal-open');
-  document.body.style.top = '';
-  document.body.style.paddingRight = pad;
-  window.scrollTo(0, y);
+  unlockPageScroll();
 }

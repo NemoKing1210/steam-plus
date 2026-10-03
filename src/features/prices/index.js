@@ -1,7 +1,8 @@
 import { on } from '../../core/bus.js';
 import { getSettings } from '../../core/settings.js';
-import { logInfo } from '../../core/debug.js';
+import { Codes, logWarn } from '../../core/debug.js';
 import { watchStoreNavigation } from '../../utils/navigation.js';
+import { placeGameBlock, resolveGameAnchor } from '../../utils/gameAnchors.js';
 import { isGamePageUrl } from '../gamepage/blocks.js';
 import { getRegion, isKnownRegion } from './regions.js';
 import { loadPriceCache } from './cache.js';
@@ -20,30 +21,6 @@ const ROOT_SELECTOR = '.sp-prices';
 export function parseAppId(url) {
   const match = String(url).match(APPID_RE);
   return match ? match[1] : null;
-}
-
-function resolveAnchor(position) {
-  const pick = (selector) => document.querySelector(selector);
-  if (position === 'sidebar') {
-    const target = pick('.rightcol.game_meta_data') ?? pick('#game_area_purchase');
-    return { target, mode: target?.classList.contains('game_meta_data') ? 'prepend' : 'before' };
-  }
-  if (position === 'description') {
-    return { target: pick('#game_area_description') ?? pick('#game_area_purchase'), mode: 'after' };
-  }
-  return { target: pick('#game_area_purchase') ?? pick('#game_area_description'), mode: 'before' };
-}
-
-function placeRoot(root, anchor) {
-  if (!anchor?.target) return false;
-  if (anchor.mode === 'prepend') {
-    anchor.target.insertBefore(root, anchor.target.firstChild);
-  } else if (anchor.mode === 'before') {
-    anchor.target.before(root);
-  } else {
-    anchor.target.after(root);
-  }
-  return root.isConnected;
 }
 
 /** Target display currency: explicit code, the visitor's store currency, or none. */
@@ -195,8 +172,8 @@ function mount(appid) {
   const wanted = settings.regions.filter(isKnownRegion);
   const root = createPricesRoot();
   setPricesCollapsed(root, settings.collapsed === true);
-  if (!placeRoot(root, resolveAnchor(settings.position))) {
-    logInfo('prices', 'no anchor for regional prices', { appid });
+  if (!placeGameBlock(root, resolveGameAnchor(settings.position))) {
+    logWarn(Codes.NO_ANCHOR, 'no anchor for regional prices', { appid, url: location.href });
     return;
   }
   current = { appid, root, sort: sortFromSettings(settings.sort), data: null };

@@ -5,6 +5,7 @@ export const REPO_URL = 'https://github.com/NemoKing1210/steam-plus';
 export const SETTINGS_KEY = 'sp_settings_v1';
 export const TRANSLATION_CACHE_KEY = 'sp_translation_cache_v1';
 export const PRICES_CACHE_KEY = 'sp_prices_cache_v1';
+export const DLC_CACHE_KEY = 'sp_dlc_cache_v1';
 
 /** Translation cache TTL, ms (7 days). */
 export const TRANSLATION_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -22,6 +23,16 @@ export const PRICE_CACHE_TTL_MS = 60 * 60 * 1000;
 export const FX_RATES_TTL_MS = 24 * 60 * 60 * 1000;
 /** Max parallel regional price requests. */
 export const MAX_PRICE_REQUESTS = 3;
+/** Add-on content cache TTL, ms (24 hours). */
+export const DLC_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+/** Owned-apps cache TTL, ms (30 minutes) — purchases change during a session. */
+export const DLC_OWNED_TTL_MS = 30 * 60 * 1000;
+/** Max add-on entries listed for one game (huge DLC catalogs are truncated). */
+export const MAX_DLC_ITEMS = 300;
+/** Max parallel per-add-on detail requests. */
+export const MAX_DLC_REQUESTS = 3;
+/** Max add-on detail entries kept in the add-on cache (oldest trimmed). */
+export const DLC_CACHE_MAX_DETAILS = 2000;
 /** Anonymous guest request timeout, ms. */
 export const REGION_REQUEST_TIMEOUT_MS = 45000;
 /** Cap for the rewritten guest document to reach window load, ms; boot continues regardless. */
@@ -182,6 +193,34 @@ const DEFAULT_LINKS = {
   ],
 };
 
+/** Add-on content (DLC) list with purchase status on store game pages. */
+const DEFAULT_DLC = {
+  /** Master switch for the add-on content block. */
+  enabled: true,
+  /** Block placement: 'purchase' (above buy options), 'sidebar', 'description'. */
+  position: 'purchase',
+  /** Row order: 'missing' (not owned first) or 'store' (Steam order). */
+  sort: 'missing',
+  /** Start with the list collapsed; the header chevron expands it. */
+  collapsed: true,
+  /** Show the owned/total counter in the header. */
+  showSummary: true,
+  /** List add-ons that are already owned. */
+  showOwned: true,
+  /** Show prices for the add-ons that are not owned. */
+  showPrices: true,
+  /** Show the add-on's store capsule image in each row. */
+  showThumbnails: true,
+  /** Show the add-on's release date in each row. */
+  showReleaseDate: true,
+  /** Open add-on images in the built-in viewer on click. */
+  viewer: true,
+  /** Show the thumbnail strip inside the viewer. */
+  viewerThumbnails: true,
+  /** Wrap around from the last add-on image to the first. */
+  viewerLoop: true,
+};
+
 export const DEFAULT_SETTINGS = {
   /** UI language: 'auto' or one of SUPPORTED_LOCALES. */
   language: 'auto',
@@ -192,6 +231,8 @@ export const DEFAULT_SETTINGS = {
   prices: DEFAULT_PRICES,
   /** External links to other stores and databases on game pages. */
   links: DEFAULT_LINKS,
+  /** Add-on content list with purchase status on store game pages. */
+  dlc: DEFAULT_DLC,
   /** Region bypass for store pages blocked with “unavailable in your region”. */
   region: DEFAULT_REGION,
   /** Toast notifications: master switch, screen corner, auto-hide ms (0 = sticky). */

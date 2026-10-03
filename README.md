@@ -3,14 +3,14 @@
 [![CI](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-102436?style=for-the-badge&labelColor=66c0f4)](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/steam-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.27.0-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.30.2-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
 
 A userscript that improves the Steam Store and Steam Community with a full
 settings panel and content translation — game descriptions, reviews, profile
 comments, news, and guides — right on the page.
 
-> **Status:** early (`0.27.0`). Settings panel (General · Translation ·
-> Game page · Prices · Links · Region) + content translation through the free Google endpoint
+> **Status:** early (`0.30.2`). Settings panel (General · Translation ·
+> Game page · Prices · Links · Add-ons · Region) + content translation through the free Google endpoint
 > (no API key). More Steam improvements planned.
 
 > The script's `@updateURL` / `@downloadURL` point at GitHub `main` — the raw
@@ -61,7 +61,7 @@ Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](docs/DEVEL
 
 **Settings** (header **Steam Plus** button or userscript-manager menu):
 
-- Tabbed panel — **General** · **Translation** · **Game page** · **Prices** · **Links** · **Region** (more tabs planned)
+- Tabbed panel — **General** · **Translation** · **Game page** · **Prices** · **Links** · **Add-ons** · **Region** (more tabs planned)
 - Steam-native dark UI; every change persists across reloads
 - Interface language: Auto (browser) or one of **10 locales** — English,
   Русский, Deutsch, Español, Français, Português (Brasil), 简体中文, 日本語,
@@ -119,6 +119,27 @@ Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](docs/DEVEL
   (`{name}` for the game title, `{appid}` for the Steam id), custom favicons,
   per-link switches, reorder controls, and an open-in-new-tab toggle
 
+**Add-on content** (store game pages):
+
+- Lists **every DLC of the game** with its capsule image, its release date,
+  its price and whether your account already owns it — an owned/total counter
+  in the header, per-row links to each add-on's store page, and "not owned
+  first" ordering so what you are missing stays on top
+- Starts collapsed to save space; expand it with the header chevron
+- Click an add-on image to open the **built-in image viewer**: fit to screen,
+  zoom (wheel, `+`/`−`, double click), drag to pan, rotate, browse every
+  add-on with `←`/`→` or the thumbnail strip, `Esc` to close; the viewer is
+  configurable (thumbnail strip, wrap-around) and keyboard-accessible
+- Reads the page's own DLC list first (names, prices, rendered images) and
+  asks Steam only for what the page does not provide — release dates and the
+  capsules Steam keeps collapsed fill in progressively and are cached for a
+  day, ownership for 30 minutes; turning **Add-on images** and **Release
+  dates** off makes a page whose rows Steam already rendered cost no requests
+  at all; a cache reset lives in the Add-ons settings tab
+- Configurable: master switch, placement (above buy options / sidebar / below
+  description), row order, owned counter, owned-rows, price, image and
+  release-date toggles
+
 **Region bypass** (blocked store pages):
 
 - Reloads `/app/`, `/bundle/` and `/sub/` pages blocked with “unavailable in
@@ -126,7 +147,8 @@ Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](docs/DEVEL
   language and age-gate cookies sent automatically, optional store-country
   (`cc`) override
 - Injects the guest page content into the live document — your logged-in header, styles and scripts stay untouched; guest inits (reviews, sysreq tabs, tags) replay and store islands hydrate in place, with a full-document rewrite as automatic fallback; translation,
-  regional prices, external links and game-page hiding apply to the injected content
+  regional prices, external links, add-on content and game-page hiding apply
+  to the injected content
   automatically; auto mode replaces the error content at once, manual mode
   shows an offer button first, failures show a status card with Retry
 - An optional HTTP proxy gateway (host, port, Basic auth, three URL modes)

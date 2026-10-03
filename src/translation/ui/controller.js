@@ -1,7 +1,7 @@
 import { Codes, logError, previewText } from '../../core/debug.js';
 import { t } from '../../i18n/index.js';
 import { showToast } from '../../ui/toast.js';
-import { el, resolveTargetLanguage } from '../../utils/dom.js';
+import { el, resolveTargetLanguage, toArray } from '../../utils/dom.js';
 import { extractRich, mirrorBlockTag, restoreFragment } from '../rich.js';
 
 const ICON_GLOBE =
@@ -312,7 +312,7 @@ export class TranslatableNode {
         for (const node of block.liveNodes) {
           if (node.parentNode === block.parent) node.remove();
         }
-        const inserted = [...fragment.childNodes];
+        const inserted = toArray(fragment.childNodes);
         block.parent.insertBefore(fragment, anchor);
         block.rendered = inserted;
       }

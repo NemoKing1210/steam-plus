@@ -14,6 +14,7 @@ export const BACKUP_SETTINGS_KEYS = [
   'gamepage',
   'prices',
   'links',
+  'dlc',
   'region',
   'toasts',
 ];
@@ -60,6 +61,7 @@ function applyImportedSettings(patch) {
   emit('settings:gamepage');
   emit('settings:prices');
   emit('settings:links');
+  emit('settings:dlc');
   emit('settings:region');
   if (next.translation.targetLanguage !== previousTarget) clearTranslationCache();
   refreshPanelDraft();

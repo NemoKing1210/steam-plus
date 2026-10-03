@@ -1,6 +1,6 @@
 import { getSettings } from '../../core/settings.js';
 import { t } from '../../i18n/index.js';
-import { el } from '../../utils/dom.js';
+import { eachNode, el } from '../../utils/dom.js';
 import { isSearchOverlayOpen, openSearchOverlay } from './overlay.js';
 
 const STORE_HOST = 'store.steampowered.com';
@@ -61,16 +61,16 @@ export function mountSearchBoxes(root = document) {
   if (location.hostname !== STORE_HOST || !isSearchEnabled()) return;
   if (root instanceof HTMLFormElement && root.matches(FORM_SELECTOR)) mountIn(root);
   if (root?.querySelectorAll) {
-    for (const form of root.querySelectorAll(FORM_SELECTOR)) mountIn(form);
+    eachNode(root.querySelectorAll(FORM_SELECTOR), (form) => mountIn(form));
   }
 }
 
 export function unmountSearchBoxes(root = document) {
   const scope = root instanceof Element || root instanceof Document ? root : document;
-  for (const box of scope.querySelectorAll('.sp-searchbox')) box.remove();
-  for (const form of scope.querySelectorAll('form[data-sp-search-box="1"]')) {
+  eachNode(scope.querySelectorAll('.sp-searchbox'), (box) => box.remove());
+  eachNode(scope.querySelectorAll('form[data-sp-search-box="1"]'), (form) => {
     delete form.dataset.spSearchBox;
     form.style.display = form.dataset.spSearchDisplay || '';
     delete form.dataset.spSearchDisplay;
-  }
+  });
 }

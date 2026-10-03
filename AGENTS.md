@@ -68,6 +68,11 @@ steam-plus/
 │   │   │   ├── template.js # {name} / {appid} URL templates, game context
 │   │   │   ├── ui.js       # External links chip block renderer
 │   │   │   └── index.js    # Mount/teardown, anchors, bus listener
+│   │   ├── dlc/
+│   │   │   ├── api.js      # Add-on ids/details (appdetails) + store-page prefill + owned apps
+│   │   │   ├── cache.js    # GM-backed add-on/ownership cache (24h / 30min)
+│   │   │   ├── ui.js       # Add-on block renderer (rows, ownership, collapse)
+│   │   │   └── index.js    # Mount/teardown, lazy detail loading, bus listener
 │   │   ├── region/
 │   │   │   ├── detect.js   # Region-error detection + store page ids
 │   │   │   ├── request.js  # Anonymous guest fetch (cookies, cc, proxy URL)
@@ -85,14 +90,20 @@ steam-plus/
 │   │           ├── gamepage.js      # Master switch + per-block hide grid + Early Access tri-state
 │   │           ├── prices.js        # Regions, position, sort, display toggles
 │   │           ├── links.js         # External links list editor (templates, icons)
+│   │           ├── dlc.js           # Add-on block switch, position, sort, display, cache
 │   │           ├── region.js        # Mode, country, banner, proxy gateway
 │   │           └── backup.js        # Settings export (file/clipboard) + validated import
 │   ├── styles/
 │   │   ├── tokens.css      # :root design tokens (sp- palette — DESIGN.md)
 │   │   └── app.css         # Injected styles, sp- prefix (GM_addStyle via build)
+│   ├── ui/
+│   │   ├── toast.js        # Toast notifications (positions, dedup, actions)
+│   │   └── viewer.js       # Fullscreen image viewer (zoom, pan, rotate, gallery)
 │   └── utils/
 │       ├── dom.js          # el, append, debounce, isOwnUi, resolveTargetLanguage
-│       └── navigation.js   # watchStoreNavigation (shared SPA URL watcher)
+│       ├── gameAnchors.js  # resolveGameAnchor / placeGameBlock (buy options, sidebar, description)
+│       ├── navigation.js   # watchStoreNavigation (shared SPA URL watcher)
+│       └── scrollLock.js   # counted page scroll lock for modal overlays
 ├── scripts/
 │   ├── lib/artifacts.mjs   # ARTIFACT_FILES list (single source of truth)
 │   ├── copy-dist.mjs       # dist/ → root artifact copy
@@ -113,7 +124,7 @@ Owns the single page-level `MutationObserver` and the debounced scan loop:
 
 - `init()`: `configureLocale(getSettings().language)` → `pagehide` cache
   flush hooks (once) → `region:rewrote` subscription (once) →
-  `bootDocument()`: all six feature inits (their one-shot bus/window
+  `bootDocument()`: all feature inits (their one-shot bus/window
   subscriptions are once-guarded, the DOM-applying part always re-runs) →
   initial `scheduleScan()` → scan-observer attach (previous observer
   disconnected first).
@@ -137,11 +148,15 @@ Single place for magic values. Notable entries:
 
 - `SCRIPT_NAME`, storage keys `SETTINGS_KEY = 'sp_settings_v1'`,
   `TRANSLATION_CACHE_KEY = 'sp_translation_cache_v1'`,
-  `PRICES_CACHE_KEY = 'sp_prices_cache_v1'`.
+  `PRICES_CACHE_KEY = 'sp_prices_cache_v1'`,
+  `DLC_CACHE_KEY = 'sp_dlc_cache_v1'`.
 - Translation limits: `TRANSLATION_CACHE_TTL_MS` (7 days),
   `TRANSLATION_CACHE_MAX_ENTRIES` (2000, LRU trim),
   `MAX_CONCURRENT_REQUESTS` (3), `MAX_REQUEST_TEXT_LENGTH` (4000 chars,
   hard-split), `SCAN_DEBOUNCE_MS` (450), `CACHE_PERSIST_MS` (1000).
+- Add-on limits: `DLC_CACHE_TTL_MS` (24 h), `DLC_OWNED_TTL_MS` (30 min),
+  `MAX_DLC_ITEMS` (300 rows per game), `MAX_DLC_REQUESTS` (3 parallel),
+  `DLC_CACHE_MAX_DETAILS` (2000 entries, oldest trimmed).
 - Region limits: `REGION_REQUEST_TIMEOUT_MS` (45000).
 - `DEFAULT_TRANSLATION` and `DEFAULT_SETTINGS` (defaults for `language` and
   the whole `translation` block); `getDefaults()` returns a deep clone (the
@@ -181,6 +196,8 @@ Minimal pub/sub: `on(event, fn)` (returns an unsubscribe fn), `off`,
   feature listens and remounts its comparison block (`applyPricesSettings`).
 - `settings:links` — emitted by the panel footer Save as well. The links
   feature listens and remounts its chip block (`applyLinksSettings`).
+- `settings:dlc` — emitted by the panel footer Save as well. The add-on
+  content feature listens and remounts its block (`applyDlcSettings`).
 - `settings:region` — emitted by the panel footer Save as well. The region
   feature listens and re-evaluates the current page (`applyRegionSettings`).
 - `region:rewrote` — emitted by `bypassRegionBlock()` after replacing the
@@ -294,9 +311,32 @@ controllers without destroying them; `destroy()` restores the original
 content and removes all injected UI. After an async translation the node
 checks `this.destroyed` before rendering — never repaint a torn-down node.
 
+### `src/ui/viewer.js` — fullscreen image viewer
+
+Steam-styled lightbox for injected images (ViewerJS-style, one instance per
+page): `openViewer({ images, index, loop, thumbnails, minZoom, maxZoom,
+labels, onClose })` takes a gallery of `{ src, title?, alt? }`,
+`closeViewer()` / `isViewerOpen()` complete the API. It fits the image to the
+stage and supports zoom (wheel, `+`/`−`, double click, pinch), pan (drag,
+clamped to the scaled size), 90° rotation, a thumbnail strip, prev/next with
+optional wrap-around, preloading of the neighbouring images and a
+danger-bordered status card when an image fails. An optional async
+`resolveImage(image, index)` hook lets the caller upgrade the shown image to a
+higher resolution after the fact (the block uses it to swap a row capsule for
+the add-on's full store image, one cached request per add-on). Keyboard:
+`Esc`, `←`/`→`,
+`Home`/`End`, `+`, `−`, `0`, `r`. The stage captures the pointer while
+panning, so clicks inside it are resolved from the element that was pressed
+(recorded on `pointerdown`) — never from `event.target`, which the capture
+retargets to the stage — and a drag never counts as a click. It locks the page
+behind it with
+`utils/scrollLock.js`, restores focus on close and renders all labels through
+`viewer.*` locale keys, overridable per call via `labels`. Excluded from
+content scans (`isOwnUi`).
+
 ### `src/features/settings/` — panel
 
-- `index.js`: registers the six pages; `ensureSettingsButton()` waits for
+- `index.js`: registers the settings pages; `ensureSettingsButton()` waits for
   `#global_actions` and prefers a native entry in the account dropdown
   (`#account_dropdown .popup_body.popup_menu`, `popup_menu_item
   sp-menu-item`); without a dropdown it appends the compact `.sp-header-btn`
@@ -314,7 +354,8 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   description and the cache badge) or one settings page with a `‹ Back`
   crumb (`switchPanelPage` / `showHome`). Pages render into a mutable
   draft on open; nothing is persisted until Save (`saveSettings` +
-  `configureLocale` + both bus events), Cancel / overlay click discards
+  `configureLocale` + every `settings:*` bus event), Cancel / overlay click
+  discards
   the draft, `Escape` returns home first (or closes on home). Changing
   the target language clears the translation cache on Save. Scroll lock
   pins `<body>` with scrollbar compensation (`sp-modal-open`) and
@@ -393,6 +434,46 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   remounts on `settings:links`, store navigation and `region:injected`.
   Favicon per link with a letter fallback (all excluded from scans).
 
+### `src/features/dlc/` — add-on content with ownership on store game pages
+
+- `api.js`: same-origin `appdetails` fetching — `fetchGameAddons(appid)`
+  (`filters=basic,dlc` → the game title + every add-on id, the authoritative
+  list), `fetchAddonDetail(appid)` (`basic,release_date,price_overview` →
+  name, price, free/coming-soon, release date and capsule image),
+  `loadAddonDetails(ids, { onEach, signal })` (bounded by
+  `MAX_DLC_REQUESTS`, progressive, per-id failure isolation);
+  `readAddonSection()` pre-parses the page's own `#gameAreaDLCSection` rows
+  (name, appid, capsule image, Steam-formatted price) so whatever Steam has
+  already rendered costs no requests — note that Steam keeps most add-on rows
+  collapsed, so their capsules are usually not in the DOM and one cached
+  detail request per add-on covers them; requests carry the page's store
+  country (`steamCountry` cookie) and language so fallback prices and dates
+  match the page itself;
+  `fetchOwnedApps()` reads `dynamicstore/userdata` (`rgOwnedApps`) through the
+  live session (account id parsed from inline scripts, same as `region/queue.js`)
+  and reports `{ loggedIn, ids }` — signed-out visitors get no ownership UI.
+- `cache.js`: memory-first GM cache (`sp_dlc_cache_v1`) — add-on ids and
+  per-add-on details (24 h TTL, oldest entries trimmed at
+  `DLC_CACHE_MAX_DETAILS`), ownership (30 min TTL); debounced persist plus a
+  synchronous `persistDlcCacheNow()` bound to `pagehide` in `main.js`;
+  `clearDlcCache()` backs the settings action.
+- `ui.js` / `index.js`: `.sp-dlc` block mounted before the buy options, in the
+  sidebar, or below the description through `utils/gameAnchors.js`; every
+  add-on of the game is listed (Steam order or "not owned first") with a
+  capsule image, an owned/total header pill, the release date, an ON
+  ("owned") pill on owned rows and a per-row store link; the header chevron
+  collapses it
+  (`is-collapsed` hides body + hint) and the `collapsed` setting starts it
+  collapsed. Detail requests for what the page does not render (missing
+  names, images, release dates or price info) only start on the first expand,
+  and the list is capped at `MAX_DLC_ITEMS` with a truncation hint. Row images
+  are buttons: clicking one opens `src/ui/viewer.js` with the block's whole
+  gallery (the largest available image per add-on, `header_image`) starting at
+  that row; the viewer's `resolveImage` hook fetches the full image of the
+  shown add-on on demand, so opening the gallery never costs more than one
+  request per add-on the user actually looks at. Remounts on `settings:dlc`,
+  store navigation and `region:injected`.
+
 ### `src/features/region/` — region-blocked store pages via guest fetch
 
 - `detect.js`: `REGION_PATTERNS` (multilingual “unavailable in your region”
@@ -428,17 +509,41 @@ checks `this.destroyed` before rendering — never repaint a torn-down node.
   `navigator.languages` through aliases with base-language fallback, else
   `'en'`; `getLocale()`; `t(key, vars)` falls back `active → en → key` and
   interpolates `{name}` placeholders.
-- `locales/*.js`: one `export default { … }` map per locale (same key set, 214 keys), all
+- `locales/*.js`: one `export default { … }` map per locale (same key set, 356 keys), all
   with **identical key order**; `locales/index.js` combines them into
   `TRANSLATIONS`.
 
 ### `src/utils/dom.js`
 
-`el(tag, className, text)`, `append`, `debounce`, `isOwnUi(node)` (true for
+`el(tag, className, text)`, `append`, `debounce`, `eachNode(collection,
+callback)`, `isOwnUi(node)` (true for
 anything inside `.sp-panel-overlay`, `.sp-settings-btn`, `.sp-translation`,
-`.sp-translate-btn`, `.sp-prices`, `.sp-region-banner` / `-offer` / `-status` /
-`-loader`), `resolveTargetLanguage(targetSetting)` (explicit value,
-else Steam `<html lang>` first two letters, else `navigator.language`).
+`.sp-translate-btn`, `.sp-prices`, `.sp-links`, `.sp-dlc`, `.sp-viewer-overlay`,
+`.sp-region-banner` / `-offer` / `-status` / `-loader` / `-othersite-reload`,
+`.sp-search-overlay` / `.sp-searchbox`), `resolveTargetLanguage(targetSetting)`
+(explicit value, else Steam `<html lang>` first two letters, else
+`navigator.language`). `eachNode` exists because DOM collections
+(`NodeList`, `HTMLCollection`, `addedNodes`, `classList`) are **not iterable in
+every engine Steam pages run in** — `for...of` over them throws
+"… is not iterable" there, so iterate DOM collections (and arrays handed in
+from the DOM) with `eachNode`, never `for...of`.
+
+### `src/utils/gameAnchors.js`
+
+`resolveGameAnchor(position)` / `placeGameBlock(root, anchor)` — the single
+anchor rule shared by every block injected into store game pages (prices,
+links, add-ons): `'purchase'` above `#game_area_purchase` (fallback
+description), `'sidebar'` prepended into `.rightcol.game_meta_data` (fallback
+before the purchase block), `'description'` after `#game_area_description`
+(fallback purchase). Returns `false` when the page has no anchor.
+
+### `src/utils/scrollLock.js`
+
+`lockPageScroll()` / `unlockPageScroll()` — counted page lock for modal
+overlays (the same `sp-modal-open` pinning the settings panel uses, with
+scrollbar compensation and scroll-position restore). A lock taken while
+another owner already pinned the page is released without touching that
+owner's state, so the viewer and the panel never unlock each other.
 
 ### `src/styles/tokens.css` + `src/styles/app.css`
 
@@ -523,6 +628,18 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `links.position` | `'purchase'` | Block placement: `'purchase'` (above buy options), `'sidebar'`, `'description'` |
 | `links.openInNewTab` | `true` | Open links in a new tab (`noopener`) |
 | `links.items` | 3 defaults | User links (`id`, `name`, `url` template, `icon`, `enabled`); empty names/URLs are dropped, max 30 |
+| `dlc.enabled` | `true` | Master switch for the add-on content block |
+| `dlc.position` | `'purchase'` | Block placement: `'purchase'` (above buy options), `'sidebar'`, `'description'` |
+| `dlc.sort` | `'missing'` | Row order: `'missing'` (add-ons you do not own first) or `'store'` (Steam order) |
+| `dlc.collapsed` | `true` | Start with the add-on list collapsed; the header chevron expands it |
+| `dlc.showSummary` | `true` | Owned/total counter pill in the block header |
+| `dlc.showOwned` | `true` | List add-ons that are already owned |
+| `dlc.showPrices` | `true` | Show prices for the add-ons that are not owned |
+| `dlc.showThumbnails` | `true` | Show each add-on's store capsule image in its row |
+| `dlc.showReleaseDate` | `true` | Show each add-on's release date in its row |
+| `dlc.viewer` | `true` | Click an add-on image to open the built-in image viewer |
+| `dlc.viewerThumbnails` | `true` | Show the thumbnail strip inside the viewer |
+| `dlc.viewerLoop` | `true` | Wrap around from the last add-on image to the first |
 | `region.enabled` | `true` | Master switch for reloading region-blocked store pages |
 | `region.mode` | `'auto'` | `'auto'` replaces the error page at once; `'manual'` shows an offer button first |
 | `region.countryCode` | `''` | Optional two-letter store country (`cc`) for guest requests; empty keeps your country |
@@ -635,9 +752,20 @@ so the root install artifacts stay synchronized. Before finishing, run
 
 ## Debugging
 
-- GM storage keys: `sp_settings_v1` and `sp_translation_cache_v1` are
+- GM storage keys: `sp_settings_v1`, `sp_translation_cache_v1`,
+  `sp_prices_cache_v1` and `sp_dlc_cache_v1` are
   inspectable in the userscript-manager storage editor; delete them to test
   cold start and defaults.
+- Add-on block: ownership comes from `dynamicstore/userdata` through the live
+  session, so it only renders for signed-in visitors — signed out the rows
+  keep prices and drop the ownership marks. The block starts collapsed and
+  costs two requests until expanded (add-on ids + ownership). On expand it
+  requests one cached detail per add-on whose name, image or release date the
+  page does not provide — Steam renders names/prices but keeps most capsules
+  collapsed, so turning off **Add-on images** and **Release dates** is what
+  makes a fully prefilled page cost zero requests; the one-day cache makes
+  repeat visits instant. A truncated list means the game has more than
+  `MAX_DLC_ITEMS` add-ons.
 - Test translation without waiting: set the target language to a non-matching
   one (e.g. `fr` on an English page) and trigger a block — the `.sp-translation`
   box or replaced text appears instantly. Repeat visits hit the cache (no

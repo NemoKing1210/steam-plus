@@ -4,11 +4,12 @@ import { SCAN_DEBOUNCE_MS } from './core/constants.js';
 import { emit, on } from './core/bus.js';
 import { configureLocale } from './i18n/index.js';
 import { getSettings } from './core/settings.js';
-import { debounce, isOwnUi } from './utils/dom.js';
+import { debounce, eachNode, isOwnUi } from './utils/dom.js';
 import { initSettingsFeature } from './features/settings/index.js';
 import { initGamepageFeature } from './features/gamepage/index.js';
 import { initPricesFeature } from './features/prices/index.js';
 import { initLinksFeature } from './features/links/index.js';
+import { initDlcFeature } from './features/dlc/index.js';
 import { initRegionFeature, refreshOtherSiteButton } from './features/region/index.js';
 import { initSearchFeature } from './features/search/index.js';
 import { mountSearchBoxes } from './features/search/box.js';
@@ -20,6 +21,7 @@ import {
 } from './features/region/inject.js';
 import { persistCacheNow } from './translation/cache.js';
 import { persistPriceCacheNow } from './features/prices/cache.js';
+import { persistDlcCacheNow } from './features/dlc/cache.js';
 import {
   initTranslationEngine,
   scanForTranslatable,
@@ -37,11 +39,11 @@ function runScan() {
     nodes.length = 0;
   }
   const roots = nodes.length ? nodes : [document];
-  for (const node of roots) {
-    if (isOwnUi(node)) continue;
+  eachNode(roots, (node) => {
+    if (isOwnUi(node)) return;
     mountSearchBoxes(node);
     scanForTranslatable(node);
-  }
+  });
   refreshOtherSiteButton();
 }
 
@@ -50,13 +52,13 @@ const scheduleScan = debounce(runScan, SCAN_DEBOUNCE_MS);
 function attachScanObserver() {
   scanObserver?.disconnect();
   scanObserver = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      for (const node of mutation.addedNodes) {
-        if (node.nodeType !== Node.ELEMENT_NODE) continue;
-        if (node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-prices, .sp-links, .sp-region-banner, .sp-region-offer, .sp-region-status, .sp-region-loader, .sp-region-othersite-reload, .sp-search-overlay, .sp-searchbox')) continue;
+    eachNode(mutations, (mutation) => {
+      eachNode(mutation.addedNodes, (node) => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        if (node.closest('.sp-panel-overlay, .sp-confirm-overlay, .sp-toasts, .sp-settings-btn, .sp-prices, .sp-links, .sp-dlc, .sp-viewer-overlay, .sp-region-banner, .sp-region-offer, .sp-region-status, .sp-region-loader, .sp-region-othersite-reload, .sp-search-overlay, .sp-searchbox')) return;
         pendingScanNodes.push(node);
-      }
-    }
+      });
+    });
     if (pendingScanNodes.length) scheduleScan();
   });
   if (document.body) {
@@ -76,6 +78,7 @@ function bootDocument() {
   initGamepageFeature();
   initPricesFeature();
   initLinksFeature();
+  initDlcFeature();
   initRegionFeature();
   initSearchFeature();
   initTranslationEngine();
@@ -107,6 +110,7 @@ function init() {
     pagehideHooked = true;
     window.addEventListener('pagehide', persistCacheNow);
     window.addEventListener('pagehide', persistPriceCacheNow);
+    window.addEventListener('pagehide', persistDlcCacheNow);
     on('region:rewrote', (payload) => {
       void handleRegionRewrote(payload);
     });

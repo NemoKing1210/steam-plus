@@ -1,5 +1,5 @@
 import { getSettings } from '../core/settings.js';
-import { el } from '../utils/dom.js';
+import { el, toArray } from '../utils/dom.js';
 
 /**
  * Steam-styled toast notifications.
@@ -156,7 +156,7 @@ export function showToast(options = {}) {
   const overflow = container.children.length - MAX_VISIBLE + 1;
   if (overflow > 0) {
     const evict = new CustomEvent('sp-toast-evict');
-    [...container.children].slice(0, overflow).forEach((child) => {
+    toArray(container.children).slice(0, overflow).forEach((child) => {
       child.dispatchEvent(evict);
     });
   }

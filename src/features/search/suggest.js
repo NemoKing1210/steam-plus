@@ -1,6 +1,7 @@
 import { getSettings } from '../../core/settings.js';
 import { SEARCH_MAX_ROWS } from '../../core/constants.js';
 import { Codes, fail } from '../../core/debug.js';
+import { eachNode } from '../../utils/dom.js';
 import { getRegion } from '../prices/regions.js';
 import {
   buildRequestUrl,
@@ -33,10 +34,10 @@ export function parseSuggestHtml(html) {
   const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
   const seen = new Set();
   const results = [];
-  for (const anchor of doc.querySelectorAll('a')) {
+  eachNode(doc.querySelectorAll('a'), (anchor) => {
     const href = anchor.getAttribute('href') || '';
     const appid = anchor.dataset?.dsAppid || href.match(APP_ID_RE)?.[1] || '';
-    if (!appid || seen.has(appid)) continue;
+    if (!appid || seen.has(appid)) return;
     seen.add(appid);
     results.push({
       appid,
@@ -45,7 +46,7 @@ export function parseSuggestHtml(html) {
       img: anchor.querySelector('.match_img img')?.getAttribute('src') || '',
       price: anchor.querySelector('.match_price')?.textContent?.trim() || '',
     });
-  }
+  });
   return results;
 }
 
@@ -81,20 +82,20 @@ const PLATFORM_CLASSES = ['win', 'mac', 'linux'];
 
 function parsePlatforms(anchor) {
   const platforms = [];
-  for (const node of anchor.querySelectorAll?.('.platform_img') ?? []) {
-    for (const name of PLATFORM_CLASSES) {
+  eachNode(anchor.querySelectorAll?.('.platform_img'), (node) => {
+    eachNode(PLATFORM_CLASSES, (name) => {
       if (node.classList?.contains(name) && !platforms.includes(name)) platforms.push(name);
-    }
-  }
+    });
+  });
   return platforms;
 }
 
 export function parseSearchResults(html) {
   const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
   const rows = new Map();
-  for (const anchor of doc.querySelectorAll('a.search_result_row[data-ds-appid]')) {
+  eachNode(doc.querySelectorAll('a.search_result_row[data-ds-appid]'), (anchor) => {
     const appid = anchor.dataset?.dsAppid || '';
-    if (!appid || rows.has(appid)) continue;
+    if (!appid || rows.has(appid)) return;
     const priceBox = anchor.querySelector?.('.search_price_discount_combined');
     rows.set(appid, {
       appid,
@@ -106,7 +107,7 @@ export function parseSearchResults(html) {
       final: textOf(anchor, '.discount_final_price'),
       free: priceBox?.getAttribute?.('data-price-final') === '0',
     });
-  }
+  });
   return rows;
 }
 

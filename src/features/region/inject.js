@@ -1,5 +1,5 @@
 import { REGION_BOOT_TIMEOUT_MS } from '../../core/constants.js';
-import { el } from '../../utils/dom.js';
+import { el, toArray } from '../../utils/dom.js';
 import { t } from '../../i18n/index.js';
 import { bypassRegionBlock } from './bypass.js';
 
@@ -32,7 +32,7 @@ export function getContentMount() {
 export function rewriteDocumentWithGuest(html) {
   // GM_addStyle runs once per script evaluation, so rescue our stylesheet:
   // open() wipes the whole document and it would never come back.
-  const keep = [...document.querySelectorAll('style')].filter((node) => node.textContent?.includes('--sp-'));
+  const keep = toArray(document.querySelectorAll('style')).filter((node) => node.textContent?.includes('--sp-'));
   document.open();
   document.write(html);
   document.close();

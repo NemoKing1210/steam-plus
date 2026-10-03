@@ -1,4 +1,4 @@
-import { isOwnUi } from '../utils/dom.js';
+import { isOwnUi, toArray } from '../utils/dom.js';
 
 /**
  * Structure-preserving translation model.
@@ -119,7 +119,7 @@ function applyInlineAttrs(node, desc) {
 }
 
 function snapshotChildren(element) {
-  return [...element.childNodes].map((node) => node.cloneNode(true));
+  return toArray(element.childNodes).map((node) => node.cloneNode(true));
 }
 
 function startBlock(walker, element, tag) {

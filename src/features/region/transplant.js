@@ -1,5 +1,6 @@
 import { REGION_ASSET_TIMEOUT_MS } from '../../core/constants.js';
 import { Codes, fail, logInfo } from '../../core/debug.js';
+import { toArray } from '../../utils/dom.js';
 import { isRegionBlockedPage } from './detect.js';
 
 // Guest catalog data is intentionally allowed: it matches the transplanted
@@ -46,7 +47,7 @@ function syncHeadStyles(guestDoc) {
   const guestHead = guestDoc.head;
   if (!liveHead || !guestHead) return 0;
   const liveHrefs = new Set(
-    [...liveHead.querySelectorAll('link[rel="stylesheet"]')].map((node) =>
+    toArray(liveHead.querySelectorAll('link[rel="stylesheet"]')).map((node) =>
       assetKey(node.getAttribute('href') || node.href),
     ),
   );
@@ -63,7 +64,7 @@ function syncHeadStyles(guestDoc) {
     liveHrefs.add(assetKey(href));
     added += 1;
   });
-  const liveStyles = new Set([...liveHead.querySelectorAll('style')].map((node) => node.textContent));
+  const liveStyles = new Set(toArray(liveHead.querySelectorAll('style')).map((node) => node.textContent));
   guestHead.querySelectorAll('style').forEach((node) => {
     if (liveStyles.has(node.textContent)) return;
     const style = document.createElement('style');
@@ -76,7 +77,7 @@ function syncHeadStyles(guestDoc) {
 
 function missingScriptSrcs(guestDoc) {
   const liveSrcs = new Set(
-    [...document.querySelectorAll('script[src]')].map((node) =>
+    toArray(document.querySelectorAll('script[src]')).map((node) =>
       assetKey(node.getAttribute('src') || node.src),
     ),
   );
@@ -154,7 +155,7 @@ function swapResponsiveShell(guestDoc) {
   const guestShell = guestDoc.querySelector('#responsive_page_template_content');
   const liveShell = document.querySelector('#responsive_page_template_content');
   if (!guestShell || !liveShell) return false;
-  const incoming = [...guestShell.childNodes]
+  const incoming = toArray(guestShell.childNodes)
     .map((node) => document.adoptNode(node))
     .filter(keepAdopted);
   if (!incoming.length) return false;

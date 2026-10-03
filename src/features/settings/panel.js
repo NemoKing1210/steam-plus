@@ -9,6 +9,8 @@ import { clearTranslationCache } from '../../translation/cache.js';
 import { confirmDialog } from './confirm.js';
 import { showToast } from '../../ui/toast.js';
 import { getIconSvg, refreshSegmented } from './controls.js';
+import { lockPageScroll, unlockPageScroll } from '../../utils/scrollLock.js';
+import { isViewerOpen } from '../../ui/viewer.js';
 
 /**
  * Settings panel shell in the style of steam-gamestatus: sticky header with
@@ -154,6 +156,7 @@ function persistPanelForm() {
     gamepage: draft.gamepage,
     prices: draft.prices,
     links: draft.links,
+    dlc: draft.dlc,
     region: draft.region,
     toasts: draft.toasts,
   });
@@ -163,6 +166,7 @@ function persistPanelForm() {
   emit('settings:gamepage');
   emit('settings:prices');
   emit('settings:links');
+  emit('settings:dlc');
   emit('settings:region');
   if (draft.translation.targetLanguage !== previousTarget) {
     clearTranslationCache();
@@ -288,48 +292,35 @@ export function togglePanel(force) {
   }
 }
 
-/** @type {{ y: number, pad: string } | null} */
-let scrollLockState = null;
+let guardInstalled = false;
 
 function isEventInsidePanelScroller(target) {
   const body = document.querySelector('#sp-panel-overlay .sp-panel__body');
   return !!(body && target instanceof Node && body.contains(target));
 }
 
+// The page pinning itself lives in utils/scrollLock.js (shared, counted);
+// the guard only stops wheel/touch from scrolling the pinned page when the
+// pointer is outside the panel's own scroller.
 function onModalScrollGuard(event) {
-  if (!panelOpen) return;
+  if (!panelOpen || isViewerOpen()) return;
   if (isEventInsidePanelScroller(event.target)) return;
   event.preventDefault();
 }
 
 function setBodyScrollLocked(locked) {
-  const root = document.documentElement;
-  const body = document.body;
-
   if (locked) {
-    if (scrollLockState) return;
-    const y = window.scrollY || root.scrollTop || body.scrollTop || 0;
-    const pad = Math.max(0, window.innerWidth - root.clientWidth);
-    scrollLockState = { y, pad: body.style.paddingRight };
-    root.classList.add('sp-modal-open');
-    if (pad) body.style.paddingRight = `${pad}px`;
-    body.style.top = `-${y}px`;
+    lockPageScroll();
+    if (guardInstalled) return;
+    guardInstalled = true;
     document.addEventListener('wheel', onModalScrollGuard, { passive: false, capture: true });
     document.addEventListener('touchmove', onModalScrollGuard, { passive: false, capture: true });
     return;
   }
 
-  if (!scrollLockState) {
-    root.classList.remove('sp-modal-open');
-    return;
-  }
-
-  const { y, pad } = scrollLockState;
-  scrollLockState = null;
+  unlockPageScroll();
+  if (!guardInstalled) return;
+  guardInstalled = false;
   document.removeEventListener('wheel', onModalScrollGuard, { capture: true });
   document.removeEventListener('touchmove', onModalScrollGuard, { capture: true });
-  root.classList.remove('sp-modal-open');
-  body.style.top = '';
-  body.style.paddingRight = pad;
-  window.scrollTo(0, y);
 }

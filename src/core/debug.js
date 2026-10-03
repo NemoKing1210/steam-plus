@@ -47,6 +47,16 @@ export const Codes = {
   REGION_QUEUE: 'SP-1415',
   /** Region search run failed (logged once at the outermost point). */
   SEARCH_FAILED: 'SP-1416',
+  /** An add-on content request failed (network, timeout, HTTP status). */
+  DLC_REQUEST: 'SP-1510',
+  /** An add-on content response was unusable. */
+  DLC_RESPONSE: 'SP-1511',
+  /** Reading or writing the add-on cache failed. */
+  DLC_CACHE: 'SP-1512',
+  /** Reading the owned-apps list failed. */
+  DLC_OWNED: 'SP-1513',
+  /** A game-page block found no anchor to mount on (error/age/region page). */
+  NO_ANCHOR: 'SP-1514',
 };
 
 const BADGE_STYLE =

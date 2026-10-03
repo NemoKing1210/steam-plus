@@ -120,6 +120,25 @@ function normalizeLinks(raw, fallback) {
     items: normalized,
   };
 }
+const DLC_SORTS = ['missing', 'store'];
+
+function normalizeDlc(raw, fallback) {
+  return {
+    enabled: raw?.enabled !== false,
+    position: LINK_POSITIONS.includes(raw?.position) ? raw.position : fallback.position,
+    sort: DLC_SORTS.includes(raw?.sort) ? raw.sort : fallback.sort,
+    collapsed: raw?.collapsed !== false,
+    showSummary: raw?.showSummary !== false,
+    showOwned: raw?.showOwned !== false,
+    showPrices: raw?.showPrices !== false,
+    showThumbnails: raw?.showThumbnails !== false,
+    showReleaseDate: raw?.showReleaseDate !== false,
+    viewer: raw?.viewer !== false,
+    viewerThumbnails: raw?.viewerThumbnails !== false,
+    viewerLoop: raw?.viewerLoop !== false,
+  };
+}
+
 const REGION_MODES = ['auto', 'manual'];
 const REGION_PROXY_MODES = ['gateway', 'path', 'query'];
 
@@ -205,6 +224,7 @@ export function loadSettings() {
     gamepage: normalizeGamepage(raw.gamepage, fallback.gamepage),
     prices: normalizePrices(raw.prices, fallback.prices),
     links: normalizeLinks(raw.links, fallback.links),
+    dlc: normalizeDlc(raw.dlc, fallback.dlc),
     region: normalizeRegion(raw.region, fallback.region),
     toasts: normalizeToasts(raw.toasts, fallback.toasts),
   };
@@ -229,6 +249,10 @@ export function getPricesSettings() {
 }
 export function getLinksSettings() {
   return settings.links;
+}
+
+export function getDlcSettings() {
+  return settings.dlc;
 }
 
 export function getRegionSettings() {
@@ -272,6 +296,15 @@ export function saveSettings(patch) {
       links: normalizeLinks(
         { ...settings.links, ...patch.links },
         getDefaults().links,
+      ),
+    };
+  }
+  if (patch.dlc) {
+    settings = {
+      ...settings,
+      dlc: normalizeDlc(
+        { ...settings.dlc, ...patch.dlc },
+        getDefaults().dlc,
       ),
     };
   }
