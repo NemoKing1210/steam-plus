@@ -1782,6 +1782,68 @@ html.sp-modal-open body {
   border-top-color: var(--sp-accent);
   animation: sp-spin 0.7s linear infinite;
 }
+.sp-prices__flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.sp-prices__insight {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 24px;
+  margin: 4px 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-prices__stat,
+.sp-prices__target {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sp-prices__stat-label {
+  color: var(--sp-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.sp-prices__stat-value {
+  color: var(--sp-text-strong);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.sp-prices__stat.is-good .sp-prices__stat-value {
+  color: var(--sp-success);
+}
+.sp-prices__stat-sub,
+.sp-prices__target-status {
+  color: var(--sp-text-muted);
+  font-size: 11px;
+}
+.sp-prices__target-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sp-prices .sp-prices__input {
+  width: 110px;
+  height: 26px;
+  font-variant-numeric: tabular-nums;
+}
+.sp-prices__target-row .sp-button {
+  flex: 0 0 auto;
+  min-height: 26px;
+  line-height: 26px;
+  white-space: nowrap;
+}
+.sp-prices__target.is-reached .sp-prices__target-status {
+  color: var(--sp-success);
+  font-weight: 700;
+}
 
 /* == External links ========================================================= */
 .sp-links {

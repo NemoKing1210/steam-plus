@@ -35,6 +35,10 @@ export const Codes = {
   FX_RATES: 'SP-1313',
   /** Reading or writing the regional price cache failed. */
   PRICE_CACHE: 'SP-1312',
+  /** The price history request or response failed. */
+  PRICE_HISTORY: 'SP-1314',
+  /** Reading or writing the saved price targets failed. */
+  PRICE_TARGETS: 'SP-1315',
   /** Region bypass guest request failed (network, timeout, HTTP status). */
   REGION_REQUEST: 'SP-1410',
   /** Region bypass guest response held no usable store content. */

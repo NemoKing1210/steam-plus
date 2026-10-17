@@ -15,6 +15,9 @@ export function createPricesRoot() {
 
   const head = el('div', 'sp-prices__head');
   head.appendChild(el('span', 'sp-prices__title', t('prices.title')));
+  const flags = el('span', 'sp-prices__flags', '');
+  flags.dataset.spPricesFlags = '';
+  head.appendChild(flags);
   const updated = el('span', 'sp-prices__updated', '');
   updated.dataset.spPricesUpdated = '';
   const refresh = el('button', 'sp-prices__refresh', '⟳');
@@ -199,6 +202,78 @@ function actionButton(label, onClick, primary) {
   button.addEventListener('click', onClick);
   return button;
 }
+
+/** Parse a user-typed price ("9.99", "9,99"); null when not a positive number. */
+function parseTargetInput(value) {
+  const amount = Number.parseFloat(String(value).trim().replace(',', '.'));
+  return Number.isFinite(amount) && amount > 0 ? Math.round(amount * 100) / 100 : null;
+}
+
+function buildStat(history) {
+  const stat = el('div', `sp-prices__stat${history.tone ? ' is-good' : ''}`);
+  stat.appendChild(el('span', 'sp-prices__stat-label', t('prices.histLow')));
+  stat.appendChild(el('span', 'sp-prices__stat-value', history.low));
+  const parts = [];
+  if (history.date) parts.push(t('prices.histDate', { date: history.date }));
+  if (history.tone === 'low') parts.push(t('prices.histAtLow'));
+  else if (history.above !== null) parts.push(t('prices.histAbove', { pct: history.above }));
+  parts.push(t('prices.histSource', { provider: 'CheapShark' }));
+  stat.appendChild(el('span', 'sp-prices__stat-sub', parts.join(' · ')));
+  return stat;
+}
+
+function buildTarget(alert, handlers) {
+  const box = el('div', `sp-prices__target${alert.reached ? ' is-reached' : ''}`);
+  box.appendChild(el('span', 'sp-prices__stat-label', t('prices.targetLabel')));
+
+  const row = el('div', 'sp-prices__target-row');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'sp-input sp-prices__input';
+  input.inputMode = 'decimal';
+  input.maxLength = 12;
+  input.placeholder = t('prices.targetPlaceholder', { currency: alert.currency });
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('aria-label', t('prices.targetLabel'));
+  const submit = () => {
+    const amount = parseTargetInput(input.value);
+    input.classList.toggle('is-invalid', amount === null);
+    if (amount !== null) handlers.onSetTarget(amount);
+  };
+  input.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    submit();
+  });
+  input.addEventListener('input', () => input.classList.remove('is-invalid'));
+  row.append(input, actionButton(t('prices.targetSet'), submit, true));
+  if (alert.goal) row.appendChild(actionButton(t('prices.targetClear'), handlers.onClearTarget, false));
+  box.appendChild(row);
+
+  if (alert.goal) {
+    const status = alert.reached
+      ? t('prices.targetReached', { target: alert.goal, price: alert.current })
+      : t('prices.targetWaiting', { target: alert.goal, price: alert.current });
+    box.appendChild(el('span', 'sp-prices__target-status', status));
+  }
+  return box;
+}
+
+function buildInsight(view, handlers) {
+  if (!view.history && !view.alert) return null;
+  const insight = el('div', 'sp-prices__insight');
+  if (view.history) insight.appendChild(buildStat(view.history));
+  if (view.alert) insight.appendChild(buildTarget(view.alert, handlers));
+  return insight;
+}
+
+function paintFlags(flags, list) {
+  flags.replaceChildren();
+  for (const flag of list ?? []) {
+    flags.appendChild(el('span', `sp-pill${flag.good ? ' is-on' : ''}`, flag.text));
+  }
+}
+
 export function setPricesCollapsed(root, collapsed) {
   root.classList.toggle('is-collapsed', collapsed);
   const toggle = root.querySelector('[data-sp-prices-toggle]');
@@ -221,7 +296,9 @@ export function paintPrices(root, view, settings, handlers) {
   const hint = root.querySelector('[data-sp-prices-hint]');
   const refresh = root.querySelector('[data-sp-prices-refresh]');
   const toggle = root.querySelector('[data-sp-prices-toggle]');
-  if (!body || !hint || !refresh || !toggle) return;
+  const flags = root.querySelector('[data-sp-prices-flags]');
+  if (!body || !hint || !refresh || !toggle || !flags) return;
+  paintFlags(flags, view.status === 'ready' ? view.flags : null);
 
   refresh.onclick = () => handlers.onRefresh();
   refresh.hidden = view.status !== 'ready';
@@ -268,6 +345,9 @@ export function paintPrices(root, view, settings, handlers) {
     ...(showDiscountCol ? [{ key: 'discount', labelKey: 'prices.colDiscount', numeric: true }] : []),
     ...(showSavingsCol ? [{ key: 'savings', labelKey: 'prices.colSavings', numeric: true }] : []),
   ];
+
+  const insight = buildInsight(view, handlers);
+  if (insight) body.appendChild(insight);
 
   const scroller = el('div', 'sp-prices__scroll');
   const table = document.createElement('table');

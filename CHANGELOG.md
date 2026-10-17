@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-10-17
+
+### Added
+
+- Price history in the regional prices block: the all-time low of the game (CheapShark, every store it tracks, in USD converted to your display currency) with its date and how far your current price sits above it; a "Historical low" or "Near historical low" pill in the block header marks a price at or close to the low, so it stays visible while the block is collapsed
+- Price alerts: set a target price on any game page (in your store currency, saved per game); the block flags it and shows a toast once per page visit when your price is at or below the target. A target saved in another currency is compared through live exchange rates
+- Prices settings: new **Price history and alerts** section with **Show historical low**, **Near-low margin** (exact / 5% / 10% / 20%) and **Price alerts** switches
+- Shared `getJson` HTTP helper (`src/utils/http.js`) used by exchange rates and price history
+
+[0.31.0]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.31.0
+
 ## [0.30.2] - 2026-10-03
 
 ### Fixed

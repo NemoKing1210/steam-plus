@@ -6,6 +6,8 @@ export const SETTINGS_KEY = 'sp_settings_v1';
 export const TRANSLATION_CACHE_KEY = 'sp_translation_cache_v1';
 export const PRICES_CACHE_KEY = 'sp_prices_cache_v1';
 export const DLC_CACHE_KEY = 'sp_dlc_cache_v1';
+export const PRICE_HISTORY_CACHE_KEY = 'sp_price_history_v1';
+export const PRICE_TARGETS_KEY = 'sp_price_targets_v1';
 
 /** Translation cache TTL, ms (7 days). */
 export const TRANSLATION_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -23,6 +25,12 @@ export const PRICE_CACHE_TTL_MS = 60 * 60 * 1000;
 export const FX_RATES_TTL_MS = 24 * 60 * 60 * 1000;
 /** Max parallel regional price requests. */
 export const MAX_PRICE_REQUESTS = 3;
+/** Price history cache TTL, ms (24 hours) — the all-time low rarely moves. */
+export const PRICE_HISTORY_TTL_MS = 24 * 60 * 60 * 1000;
+/** Max games kept in the price history cache (oldest trimmed). */
+export const PRICE_HISTORY_MAX_ENTRIES = 500;
+/** Max per-game price targets kept in storage (oldest trimmed). */
+export const PRICE_TARGETS_MAX_ENTRIES = 500;
 /** Add-on content cache TTL, ms (24 hours). */
 export const DLC_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 /** Owned-apps cache TTL, ms (30 minutes) — purchases change during a session. */
@@ -131,6 +139,12 @@ const DEFAULT_PRICES = {
   showConverted: true,
   /** Start with the comparison block collapsed; the header chevron expands it. */
   collapsed: true,
+  /** Show the all-time low price from the price history provider. */
+  showHistory: true,
+  /** A price within this percent above the all-time low counts as near-low (0 = exact low only). */
+  nearLowPct: 10,
+  /** Per-game price target: input in the block, flag and notification when reached. */
+  targetEnabled: true,
 };
 
 /** Region bypass: guest reload of store pages blocked with “unavailable in your region”. */

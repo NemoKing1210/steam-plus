@@ -1,12 +1,16 @@
 import { on } from '../../core/bus.js';
 import { getSettings } from '../../core/settings.js';
 import { Codes, logWarn } from '../../core/debug.js';
+import { t } from '../../i18n/index.js';
+import { showToast } from '../../ui/toast.js';
 import { watchStoreNavigation } from '../../utils/navigation.js';
 import { placeGameBlock, resolveGameAnchor } from '../../utils/gameAnchors.js';
 import { isGamePageUrl } from '../gamepage/blocks.js';
 import { getRegion, isKnownRegion } from './regions.js';
 import { loadPriceCache } from './cache.js';
 import { loadAppPrices } from './api.js';
+import { loadPriceHistory, loadPriceHistoryCache } from './history.js';
+import { clearPriceTarget, getPriceTarget, setPriceTarget } from './targets.js';
 import {
   convertMinor,
   formatMoney,
@@ -69,6 +73,88 @@ function formatFxDate(fx) {
 /** Current mount: removed on navigation, settings change, or teardown. */
 let current = null;
 
+/** Apps whose target-reached toast already fired in this page session. */
+const notified = new Set();
+
+function homeUsdOf(home) {
+  if (!home) return null;
+  return home.currency === 'USD' ? home.final / 100 : home.usd;
+}
+
+function formatLow(priceUsd, currency, rates) {
+  if (currency && currency !== 'USD' && rates) {
+    const amount = convertMinor(priceUsd * 100, 'USD', currency, rates);
+    if (amount !== null) return formatMoney(amount, currency);
+  }
+  return formatMoney(priceUsd, 'USD');
+}
+
+function formatLowDate(ts) {
+  if (!ts) return '';
+  const parsed = new Date(ts);
+  return Number.isNaN(parsed.getTime()) ? '' : parsed.toLocaleDateString();
+}
+
+function isTargetReached(goal, home, rates) {
+  if (!goal || !home) return false;
+  const price = home.final / 100;
+  if (goal.currency === home.currency) return price <= goal.amount;
+  const converted = rates ? convertMinor(goal.amount * 100, goal.currency, home.currency, rates) : null;
+  return converted !== null && price <= converted;
+}
+
+/** History strip, price-alert state and header flags derived from the loaded data. */
+function buildInsight() {
+  const { data, inputs, appid } = current;
+  const settings = getSettings().prices;
+  const { home } = data;
+  const flags = [];
+
+  let history = null;
+  if (settings.showHistory && inputs.history) {
+    const low = inputs.history;
+    const homeUsd = homeUsdOf(home);
+    const ratio = homeUsd !== null ? homeUsd / low.price : null;
+    const above = ratio !== null && ratio > 1.005 ? Math.round((ratio - 1) * 100) : null;
+    let tone = null;
+    if (ratio !== null && above === null) tone = 'low';
+    else if (above !== null && above <= settings.nearLowPct) tone = 'near';
+    if (tone === 'low') flags.push({ text: t('prices.flagLow'), good: true });
+    if (tone === 'near') flags.push({ text: t('prices.flagNear'), good: false });
+    history = {
+      low: formatLow(low.price, inputs.currency, inputs.rates),
+      date: formatLowDate(low.date),
+      tone,
+      above,
+    };
+  }
+
+  let alert = null;
+  if (settings.targetEnabled && home) {
+    const goal = getPriceTarget(appid);
+    const reached = isTargetReached(goal, home, inputs.rates);
+    if (reached) flags.push({ text: t('prices.flagTarget'), good: true });
+    alert = {
+      currency: home.currency,
+      goal: goal ? formatMoney(goal.amount, goal.currency) : null,
+      current: home.final_formatted,
+      reached,
+    };
+  }
+  return { history, alert, flags };
+}
+
+function notifyTargetReached(appid, insight) {
+  if (!insight.alert?.reached || notified.has(appid)) return;
+  notified.add(appid);
+  showToast({
+    type: 'success',
+    title: t('prices.targetToastTitle'),
+    message: t('prices.targetToastBody', { price: insight.alert.current, target: insight.alert.goal }),
+    key: `sp-price-target-${appid}`,
+  });
+}
+
 /** Default in-block table sort derived from the settings row order. */
 function sortFromSettings(sort) {
   if (sort === 'priceAsc') return { key: 'price', dir: 'asc' };
@@ -84,7 +170,7 @@ function repaint() {
   if (!current?.data || !current.root.isConnected) return;
   paintPrices(
     current.root,
-    { ...current.data, sort: current.sort },
+    { ...current.data, ...buildInsight(), sort: current.sort },
     getSettings().prices,
     handlers(current.appid, current.root),
   );
@@ -98,9 +184,15 @@ function teardown() {
 async function loadInto(appid, root, settings, { force } = {}) {
   const handlersRef = handlers(appid, root);
   paintPrices(root, { status: 'loading' }, settings, handlersRef);
-  const [prices, fx] = await Promise.all([
+  const [prices, fx, history] = await Promise.all([
     loadAppPrices(appid, settings.regions, { force }),
     loadFxRates({ force }, settings.fxTtl).catch(() => null),
+    settings.showHistory
+      ? loadPriceHistory(appid, { force }).catch((error) => {
+          logWarn(Codes.PRICE_HISTORY, 'price history unavailable', error?.details);
+          return null;
+        })
+      : null,
   ]);
   if (!root.isConnected || current?.root !== root) return;
   const { home, homeFailed, regions } = prices;
@@ -141,7 +233,9 @@ async function loadInto(appid, root, settings, { force } = {}) {
         ? { provider: fx.provider, date: formatFxDate(fx) }
         : null,
     };
+    current.inputs = { history, rates, currency: target };
     repaint();
+    notifyTargetReached(appid, buildInsight());
   }
 }
 
@@ -155,6 +249,18 @@ function handlers(appid, root) {
     },
     onRefresh: () => {
       if (current?.root === root) void loadInto(appid, root, getSettings().prices, { force: true });
+    },
+    onSetTarget: (amount) => {
+      const home = current?.root === root ? current.data?.home : null;
+      if (!home) return;
+      setPriceTarget(appid, amount, home.currency);
+      repaint();
+    },
+    onClearTarget: () => {
+      if (current?.root !== root) return;
+      clearPriceTarget(appid);
+      notified.delete(appid);
+      repaint();
     },
     onSort: (key) => {
       if (current?.root !== root) return;
@@ -176,7 +282,7 @@ function mount(appid) {
     logWarn(Codes.NO_ANCHOR, 'no anchor for regional prices', { appid, url: location.href });
     return;
   }
-  current = { appid, root, sort: sortFromSettings(settings.sort), data: null };
+  current = { appid, root, sort: sortFromSettings(settings.sort), data: null, inputs: null };
   if (!wanted.length) {
     paintPrices(root, { status: 'empty-regions' }, settings, handlers(appid, root));
     return;
@@ -203,6 +309,7 @@ let pricesSubscribed = false;
 
 export function initPricesFeature() {
   loadPriceCache();
+  loadPriceHistoryCache();
   applyPricesSettings();
   if (pricesSubscribed) return;
   pricesSubscribed = true;

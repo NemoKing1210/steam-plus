@@ -3,13 +3,13 @@
 [![CI](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-102436?style=for-the-badge&labelColor=66c0f4)](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/steam-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.30.2-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.31.0-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
 
 A userscript that improves the Steam Store and Steam Community with a full
 settings panel and content translation — game descriptions, reviews, profile
 comments, news, and guides — right on the page.
 
-> **Status:** early (`0.30.2`). Settings panel (General · Translation ·
+> **Status:** early (`0.31.0`). Settings panel (General · Translation ·
 > Game page · Prices · Links · Add-ons · Region) + content translation through the free Google endpoint
 > (no API key). More Steam improvements planned.
 
@@ -109,6 +109,10 @@ Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](docs/DEVEL
   with configurable lifetime, status and manual clear in settings): every
   price converts into your store currency automatically or any chosen one,
   with the rates source stamped under the block
+- Price history and alerts: the game's all-time low (CheapShark) with its
+  date and your distance from it, a header pill when your price is at or
+  near the low, and a per-game target price that flags the block and shows
+  a notification once your price drops to it
 
 **External links** (store game pages):
 

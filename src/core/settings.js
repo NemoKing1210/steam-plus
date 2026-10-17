@@ -77,6 +77,7 @@ function normalizeGamepage(raw, fallback) {
 const PRICE_POSITIONS = ['purchase', 'sidebar', 'description'];
 const PRICE_SORTS = ['custom', 'priceAsc', 'discountDesc'];
 const FX_TTLS = [3600000, 21600000, 86400000, 604800000];
+const NEAR_LOW_PCTS = [0, 5, 10, 20];
 export const LINK_POSITIONS = ['purchase', 'sidebar', 'description'];
 export const MAX_LINKS = 30;
 export const MAX_LINK_FIELD = 500;
@@ -190,6 +191,9 @@ function normalizePrices(raw, fallback) {
     showConverted: raw?.showConverted !== false,
     collapsed: raw?.collapsed !== false,
     fxTtl: FX_TTLS.includes(Number(raw?.fxTtl)) ? Number(raw.fxTtl) : fallback.fxTtl,
+    showHistory: raw?.showHistory !== false,
+    nearLowPct: NEAR_LOW_PCTS.includes(Number(raw?.nearLowPct)) ? Number(raw.nearLowPct) : fallback.nearLowPct,
+    targetEnabled: raw?.targetEnabled !== false,
   };
 }
 

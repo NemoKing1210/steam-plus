@@ -64,7 +64,7 @@ export default defineConfig({
           'https://store.steampowered.com/*',
           'https://steamcommunity.com/*',
         ],
-        connect: ['translate.googleapis.com', 'open.er-api.com', 'cdn.jsdelivr.net', 'store.steampowered.com', '*'],
+        connect: ['translate.googleapis.com', 'open.er-api.com', 'cdn.jsdelivr.net', 'www.cheapshark.com', 'store.steampowered.com', '*'],
         'run-at': 'document-idle',
         noframes: true,
       },

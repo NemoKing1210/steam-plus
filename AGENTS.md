@@ -62,6 +62,8 @@ steam-plus/
 │   │   │   ├── fx.js       # Live exchange rates (2 providers + 24h GM cache)
 │   │   │   ├── api.js      # Same-origin appdetails price fetching (bounded)
 │   │   │   ├── cache.js    # GM-backed price cache (1h TTL)
+│   │   │   ├── history.js  # All-time low (CheapShark, 24h GM cache)
+│   │   │   ├── targets.js  # Per-game target price store (GM)
 │   │   │   ├── ui.js       # Comparison block renderer (states + rows)
 │   │   │   └── index.js    # Mount/teardown, anchors, bus listener
 │   │   ├── links/
@@ -102,6 +104,7 @@ steam-plus/
 │   └── utils/
 │       ├── dom.js          # el, append, debounce, isOwnUi, resolveTargetLanguage
 │       ├── gameAnchors.js  # resolveGameAnchor / placeGameBlock (buy options, sidebar, description)
+│       ├── http.js         # getJson (GM_xmlhttpRequest with fetch fallback)
 │       ├── navigation.js   # watchStoreNavigation (shared SPA URL watcher)
 │       └── scrollLock.js   # counted page scroll lock for modal overlays
 ├── scripts/
@@ -149,7 +152,11 @@ Single place for magic values. Notable entries:
 - `SCRIPT_NAME`, storage keys `SETTINGS_KEY = 'sp_settings_v1'`,
   `TRANSLATION_CACHE_KEY = 'sp_translation_cache_v1'`,
   `PRICES_CACHE_KEY = 'sp_prices_cache_v1'`,
-  `DLC_CACHE_KEY = 'sp_dlc_cache_v1'`.
+  `DLC_CACHE_KEY = 'sp_dlc_cache_v1'`,
+  `PRICE_HISTORY_CACHE_KEY = 'sp_price_history_v1'`,
+  `PRICE_TARGETS_KEY = 'sp_price_targets_v1'`.
+- Price history limits: `PRICE_HISTORY_TTL_MS` (24 h),
+  `PRICE_HISTORY_MAX_ENTRIES` (500 games), `PRICE_TARGETS_MAX_ENTRIES` (500).
 - Translation limits: `TRANSLATION_CACHE_TTL_MS` (7 days),
   `TRANSLATION_CACHE_MAX_ENTRIES` (2000, LRU trim),
   `MAX_CONCURRENT_REQUESTS` (3), `MAX_REQUEST_TEXT_LENGTH` (4000 chars,
@@ -415,12 +422,27 @@ content scans (`isOwnUi`).
   `loadAppPrices` with `MAX_PRICE_REQUESTS` parallelism, per-region
   failure isolation, refresh bypasses the cache).
 - `cache.js`: memory-first GM cache (`sp_prices_cache_v1`, 1h TTL).
+- `history.js`: `loadPriceHistory(appid, { force })` → CheapShark
+  `games?steamAppID=` then `games?id=` → `cheapestPriceEver` as
+  `{ price (USD), date (ms) }`, or null when the game is not tracked (cached
+  too; failures throw `SP-1314` and are never cached). The low spans every
+  store CheapShark tracks, not Steam alone. Memory-first GM cache
+  (`sp_price_history_v1`, 24h TTL, newest 500 kept), flushed on `pagehide`.
+- `targets.js`: per-game target price `{ amount, currency }` in major units
+  of the store currency (`sp_price_targets_v1`, written immediately, newest
+  500 kept); `getPriceTarget` / `setPriceTarget` / `clearPriceTarget`.
 - `ui.js` / `index.js`: `.sp-prices` table mounted before the buy options,
   in the sidebar, or below the description (with fallbacks); headers sort
   in-block with direction toggle (settings row order is the default, home
   row stays pinned); header chevron collapses the block (`is-collapsed`
   hides body + hint), the `collapsed` setting starts it collapsed; remounts
   on `settings:prices` and store navigation; hides itself for free games.
+  An insight strip above the table shows the all-time low (converted into
+  the display currency, with its date and your distance from it) and the
+  price-alert form; header pills (`Historical low` / `Near historical low` /
+  `Target reached`) stay visible while collapsed. A reached target fires one
+  toast per app per page session. Low and target comparisons use the home
+  row (USD directly, other currencies through live rates).
 
 ### `src/features/links/` — external links on store game pages
 
@@ -509,7 +531,7 @@ content scans (`isOwnUi`).
   `navigator.languages` through aliases with base-language fallback, else
   `'en'`; `getLocale()`; `t(key, vars)` falls back `active → en → key` and
   interpolates `{name}` placeholders.
-- `locales/*.js`: one `export default { … }` map per locale (same key set, 356 keys), all
+- `locales/*.js`: one `export default { … }` map per locale (same key set, 384 keys), all
   with **identical key order**; `locales/index.js` combines them into
   `TRANSLATIONS`.
 
@@ -623,6 +645,9 @@ Stored under `sp_settings_v1` (only `getSettings()` reads,
 | `prices.convertTo` | `'auto'` | Display currency: `'auto'` (own store currency), `'off'`, or an ISO code — every price converts via live rates |
 | `prices.showConverted` | `true` | Show the converted price (`≈ …`) next to Steam's formatted price |
 | `prices.collapsed` | `true` | Start with the comparison block collapsed; the header chevron expands it |
+| `prices.showHistory` | `true` | Show the all-time low (fetches CheapShark; off costs no history requests) |
+| `prices.nearLowPct` | `10` | Percent above the all-time low still flagged as near-low: 0 / 5 / 10 / 20 |
+| `prices.targetEnabled` | `true` | Price alert form, header pill and toast for a per-game target (targets live in `sp_price_targets_v1`, not in settings) |
 | `prices.fxTtl` | `86400000` (24h) | Exchange rates cache lifetime: 1h / 6h / 24h / 7d; the Conversion section also shows the cached-rates status and a clear-cache button |
 | `links.enabled` | `true` | Master switch for the external links block |
 | `links.position` | `'purchase'` | Block placement: `'purchase'` (above buy options), `'sidebar'`, `'description'` |

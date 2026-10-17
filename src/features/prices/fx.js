@@ -1,8 +1,8 @@
 import { FX_RATES_TTL_MS } from '../../core/constants.js';
 import { Codes, fail, logInfo } from '../../core/debug.js';
+import { getJson } from '../../utils/http.js';
 
 const FX_CACHE_KEY = 'sp_fx_cache_v1';
-const REQUEST_TIMEOUT_MS = 15000;
 
 const PROVIDERS = [
   {
@@ -22,39 +22,6 @@ const PROVIDERS = [
     },
   },
 ];
-
-function getJson(url) {
-  if (typeof GM_xmlhttpRequest === 'function') {
-    return new Promise((resolve, reject) => {
-      GM_xmlhttpRequest({
-        method: 'GET',
-        url,
-        timeout: REQUEST_TIMEOUT_MS,
-        onload: (response) => {
-          if (response.status !== 200) {
-            reject(new Error(`HTTP ${response.status}`));
-            return;
-          }
-          try {
-            resolve(JSON.parse(response.responseText));
-          } catch (error) {
-            reject(error);
-          }
-        },
-        onerror: () => reject(new Error('network error')),
-        ontimeout: () => reject(new Error('timed out')),
-      });
-    });
-  }
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  return fetch(url, { signal: controller.signal })
-    .then((response) => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json();
-    })
-    .finally(() => clearTimeout(timer));
-}
 
 function readCache() {
   try {

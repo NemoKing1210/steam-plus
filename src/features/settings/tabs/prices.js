@@ -14,6 +14,7 @@ import { clearFxCache, peekFxCache } from '../../prices/fx.js';
 
 const POSITIONS = ['purchase', 'sidebar', 'description'];
 const SORTS = ['custom', 'priceAsc', 'discountDesc'];
+const NEAR_LOW_PCTS = [0, 5, 10, 20];
 const FX_TTLS = [
   { value: 3600000, key: '1h' },
   { value: 21600000, key: '6h' },
@@ -147,6 +148,43 @@ export const pricesTab = {
       }, 'sp-button--ghost'),
     );
     pane.appendChild(conversionSection);
+
+    const historySection = createSection({ icon: 'bell', title: t('prices.history') });
+    historySection.appendChild(createHint(t('prices.historyDesc')));
+    historySection.appendChild(
+      createSwitchRow({
+        checked: pr.showHistory !== false,
+        label: t('prices.showHistory'),
+        onChange: (checked) => {
+          pr.showHistory = checked;
+        },
+      }),
+    );
+    historySection.appendChild(createHint(t('prices.showHistoryDesc')));
+    historySection.appendChild(
+      createField({
+        label: t('prices.nearLow'),
+        hint: t('prices.nearLowDesc'),
+        control: createSelect(
+          NEAR_LOW_PCTS.map((pct) => ({ value: pct, label: t(`nearLow.${pct}`) })),
+          pr.nearLowPct,
+          (value) => {
+            pr.nearLowPct = Number(value);
+          },
+        ),
+      }),
+    );
+    historySection.appendChild(
+      createSwitchRow({
+        checked: pr.targetEnabled !== false,
+        label: t('prices.targetEnabled'),
+        onChange: (checked) => {
+          pr.targetEnabled = checked;
+        },
+      }),
+    );
+    historySection.appendChild(createHint(t('prices.targetEnabledDesc')));
+    pane.appendChild(historySection);
 
     const regionsSection = createSection({ icon: 'globe', title: t('prices.regions') });
     regionsSection.appendChild(createHint(t('prices.regionsDesc')));

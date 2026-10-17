@@ -21,6 +21,7 @@ import {
 } from './features/region/inject.js';
 import { persistCacheNow } from './translation/cache.js';
 import { persistPriceCacheNow } from './features/prices/cache.js';
+import { persistPriceHistoryNow } from './features/prices/history.js';
 import { persistDlcCacheNow } from './features/dlc/cache.js';
 import {
   initTranslationEngine,
@@ -110,6 +111,7 @@ function init() {
     pagehideHooked = true;
     window.addEventListener('pagehide', persistCacheNow);
     window.addEventListener('pagehide', persistPriceCacheNow);
+    window.addEventListener('pagehide', persistPriceHistoryNow);
     window.addEventListener('pagehide', persistDlcCacheNow);
     on('region:rewrote', (payload) => {
       void handleRegionRewrote(payload);

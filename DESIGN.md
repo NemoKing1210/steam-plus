@@ -274,6 +274,17 @@ accent wash. Loading uses the ring spinner; errors and the manual-load
 button reuse `.sp-button` tones. The rates source line (`prices.fxHint`)
 stays hidden unless rates actually feed something visible.
 
+An insight strip (`.sp-prices__insight`) sits above the table, separated by
+a `--sp-line` hairline: the all-time low as a stat (`.sp-prices__stat` —
+uppercase muted label, 15px bold value that turns `--sp-success` when your
+price is at or near the low, muted sub line with date, distance and source)
+beside the price-alert block (`.sp-prices__target` — label, 26px `.sp-input`,
+`.sp-button` Set, ghost Clear; the status line turns `--sp-success` and bold
+once the target is reached; an invalid entry gets the `.is-invalid` outline).
+Header pills (`.sp-prices__flags`) reuse `.sp-pill`, with `is-on` for
+"Historical low" and "Target reached" and the plain pill for "Near historical
+low", so the verdict survives a collapsed block.
+
 A ghost chevron in the header collapses the block to save space (`is-collapsed` hides body + hint, chevron rotates); `prices.collapsed` starts it collapsed.
 
 ### External links (`.sp-links`)
