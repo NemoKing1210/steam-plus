@@ -54,6 +54,16 @@ Reference screenshots and other repo files from the README with absolute URLs
 the README is rendered outside GitHub as well (for example on Greasy Fork),
 where relative paths break.
 
+The README is localized into every interface language the script ships:
+`README.md` (English) plus `README.<locale>.md` (`de`, `ru`, `es`, `fr`,
+`pt-BR`, `zh-CN`, `ja`, `ko`, `pl`). Keep the same section structure and image
+set in all ten, update them in the same change when a feature or screenshot
+changes, and keep the language switcher at the top of each file listing every
+locale in one fixed order (English, Deutsch, Русский, Español, Français,
+Português (Brasil), 简体中文, 日本語, 한국어, Polski) with the current one in
+bold. Localized files omit the version badge and the version literal in the
+Status line so a release bump only touches `README.md`.
+
 ## Releasing
 
 1. Bump `version` in `package.json` (`npm install` refreshes the lockfile)

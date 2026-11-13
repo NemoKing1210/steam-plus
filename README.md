@@ -3,13 +3,15 @@
 [![CI](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-102436?style=for-the-badge&labelColor=66c0f4)](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/steam-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.30.4-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.30.5-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
+
+**English** · [Deutsch](https://github.com/NemoKing1210/steam-plus/blob/main/README.de.md) · [Русский](https://github.com/NemoKing1210/steam-plus/blob/main/README.ru.md) · [Español](https://github.com/NemoKing1210/steam-plus/blob/main/README.es.md) · [Français](https://github.com/NemoKing1210/steam-plus/blob/main/README.fr.md) · [Português (Brasil)](https://github.com/NemoKing1210/steam-plus/blob/main/README.pt-BR.md) · [简体中文](https://github.com/NemoKing1210/steam-plus/blob/main/README.zh-CN.md) · [日本語](https://github.com/NemoKing1210/steam-plus/blob/main/README.ja.md) · [한국어](https://github.com/NemoKing1210/steam-plus/blob/main/README.ko.md) · [Polski](https://github.com/NemoKing1210/steam-plus/blob/main/README.pl.md)
 
 A userscript that improves the Steam Store and Steam Community with a full
 settings panel and content translation — game descriptions, reviews, profile
 comments, news, and guides — right on the page.
 
-> **Status:** early (`0.30.4`). Settings panel (General · Translation ·
+> **Status:** early (`0.30.5`). Settings panel (General · Translation ·
 > Game page · Prices · Links · Add-ons · Region) + content translation through the free Google endpoint
 > (no API key). More Steam improvements planned.
 

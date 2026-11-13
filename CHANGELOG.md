@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.5] - 2026-11-13
+
+### Added
+
+- Localized READMEs for every interface language the script ships: Deutsch, Русский, Español, Français, Português (Brasil), 简体中文, 日本語, 한국어 and Polski, all with a language switcher and the same screenshots
+
+[0.30.5]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.30.5
+
 ## [0.30.4] - 2026-11-13
 
 ### Added
