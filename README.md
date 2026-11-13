@@ -3,13 +3,13 @@
 [![CI](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-102436?style=for-the-badge&labelColor=66c0f4)](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/steam-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.30.3-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.30.4-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
 
 A userscript that improves the Steam Store and Steam Community with a full
 settings panel and content translation — game descriptions, reviews, profile
 comments, news, and guides — right on the page.
 
-> **Status:** early (`0.30.3`). Settings panel (General · Translation ·
+> **Status:** early (`0.30.4`). Settings panel (General · Translation ·
 > Game page · Prices · Links · Add-ons · Region) + content translation through the free Google endpoint
 > (no API key). More Steam improvements planned.
 
@@ -190,6 +190,7 @@ on the translation service.
 - [docs/DEVELOPMENT.md](https://github.com/NemoKing1210/steam-plus/blob/main/docs/DEVELOPMENT.md) — build, local testing, releasing
 - [docs/ARCHITECTURE.md](https://github.com/NemoKing1210/steam-plus/blob/main/docs/ARCHITECTURE.md) — module layout, data flow, extension contracts
 - [CONTRIBUTING.md](https://github.com/NemoKing1210/steam-plus/blob/main/CONTRIBUTING.md) — PR guidelines and conventions
+- [SECURITY.md](https://github.com/NemoKing1210/steam-plus/blob/main/SECURITY.md) — how to report a vulnerability
 - [AGENTS.md](https://github.com/NemoKing1210/steam-plus/blob/main/AGENTS.md) — architecture notes for AI coding agents
 
 ```bash

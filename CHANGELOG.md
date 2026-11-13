@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.4] - 2026-11-13
+
+### Added
+
+- SECURITY.md with the supported-version policy, the private vulnerability-reporting path and the scope of security reports
+
+[0.30.4]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.30.4
+
 ## [0.30.3] - 2026-11-13
 
 ### Added
