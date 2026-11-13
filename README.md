@@ -3,18 +3,34 @@
 [![CI](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/steam-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-102436?style=for-the-badge&labelColor=66c0f4)](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/steam-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.30.2-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.30.3-green?style=for-the-badge)](https://github.com/NemoKing1210/steam-plus/blob/main/CHANGELOG.md)
 
 A userscript that improves the Steam Store and Steam Community with a full
 settings panel and content translation — game descriptions, reviews, profile
 comments, news, and guides — right on the page.
 
-> **Status:** early (`0.30.2`). Settings panel (General · Translation ·
+> **Status:** early (`0.30.3`). Settings panel (General · Translation ·
 > Game page · Prices · Links · Add-ons · Region) + content translation through the free Google endpoint
 > (no API key). More Steam improvements planned.
 
 > The script's `@updateURL` / `@downloadURL` point at GitHub `main` — the raw
 > install URL below is always the newest build.
+
+## Screenshots
+
+The real userscript running on a live Steam page. Translation target is set to
+French for the screenshots.
+
+![Steam Plus settings panel with General, Translation, Game page, Prices, External links, Add-ons, Region, Cache, Backup and About pages](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/docs/screenshots/settings-panel.png)
+
+| | |
+|---|---|
+| ![Game description translated below the original](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/docs/screenshots/translation.png)<br>**Translation** — descriptions, reviews, comments and news, below the original or replacing it | ![Regional price comparison table](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/docs/screenshots/regional-prices.png)<br>**Regional prices** — 24 store regions, cheapest highlighted, live currency conversion |
+| ![Add-on content list](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/docs/screenshots/add-ons.png)<br>**Add-on content** — every DLC with price and release date; ownership appears when signed in | ![External links chips](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/docs/screenshots/external-links.png)<br>**External links** — quick chips to SteamDB, ProtonDB, HowLongToBeat and your own links |
+| ![Add-on image viewer](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/docs/screenshots/viewer.png)<br>**Image viewer** — zoom, pan, rotate and browse add-on artwork | ![Quick search overlay](https://raw.githubusercontent.com/NemoKing1210/steam-plus/main/docs/screenshots/search.png)<br>**Quick search** — search the store across regions from any store page |
+
+Also on game pages: hide the blocks you never read, and reload region-locked
+store pages through an anonymous guest fetch.
 
 ## Quick install
 
@@ -55,7 +71,7 @@ manager dashboard.
 The script includes `@updateURL` and `@downloadURL` metadata pointing to the
 raw GitHub file. Supported managers check for updates automatically.
 
-Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](docs/DEVELOPMENT.md#releasing).
+Release steps for maintainers: see [docs/DEVELOPMENT.md § Releasing](https://github.com/NemoKing1210/steam-plus/blob/main/docs/DEVELOPMENT.md#releasing).
 
 ## Features
 
@@ -171,10 +187,10 @@ on the translation service.
 
 ## Development & contributing
 
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — build, local testing, releasing
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — module layout, data flow, extension contracts
-- [CONTRIBUTING.md](CONTRIBUTING.md) — PR guidelines and conventions
-- [AGENTS.md](AGENTS.md) — architecture notes for AI coding agents
+- [docs/DEVELOPMENT.md](https://github.com/NemoKing1210/steam-plus/blob/main/docs/DEVELOPMENT.md) — build, local testing, releasing
+- [docs/ARCHITECTURE.md](https://github.com/NemoKing1210/steam-plus/blob/main/docs/ARCHITECTURE.md) — module layout, data flow, extension contracts
+- [CONTRIBUTING.md](https://github.com/NemoKing1210/steam-plus/blob/main/CONTRIBUTING.md) — PR guidelines and conventions
+- [AGENTS.md](https://github.com/NemoKing1210/steam-plus/blob/main/AGENTS.md) — architecture notes for AI coding agents
 
 ```bash
 npm install
@@ -192,4 +208,4 @@ community userscript.
 
 ## License
 
-[MIT](LICENSE) — Copyright (c) 2026 NemoKing1210
+[MIT](https://github.com/NemoKing1210/steam-plus/blob/main/LICENSE) — Copyright (c) 2026 NemoKing1210

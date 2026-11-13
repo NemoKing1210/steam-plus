@@ -42,6 +42,18 @@ Tampermonkey does not track local files natively. Options:
 Constants in `src/core/constants.js`: translation cache TTL, cache entry
 limit, concurrent request cap, request text length cap, scan debounce.
 
+## Screenshots
+
+README screenshots live in `docs/screenshots/`. They are real captures of the
+built `steam-plus.user.js` on a live Store page (translation target set to
+French); refresh the matching image when a change alters its injected UI, and
+keep the filenames referenced by `README.md`.
+
+Reference screenshots and other repo files from the README with absolute URLs
+(`raw.githubusercontent.com` for images, `github.com/.../blob/...` for pages):
+the README is rendered outside GitHub as well (for example on Greasy Fork),
+where relative paths break.
+
 ## Releasing
 
 1. Bump `version` in `package.json` (`npm install` refreshes the lockfile)

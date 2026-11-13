@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.3] - 2026-11-13
+
+### Added
+
+- README screenshots: a settings-panel overview plus the translation, regional prices, add-on content, external links, image viewer and quick search blocks in action
+
+### Changed
+
+- README links use absolute GitHub URLs, so the screenshots and docs links also work where the README is mirrored outside GitHub (Greasy Fork)
+
+[0.30.3]: https://github.com/NemoKing1210/steam-plus/releases/tag/v0.30.3
+
 ## [0.30.2] - 2026-10-03
 
 ### Fixed
